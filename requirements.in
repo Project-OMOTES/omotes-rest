@@ -5,31 +5,18 @@ Flask-CORS
 flask-reverse-proxy-fix
 flask-smorest
 Flask-dotenv
-Flask-Migrate
-Flask-SQLAlchemy
 marshmallow
-marshmallow_dataclass[enum]
-marshmallow_enum
-marshmallow-sqlalchemy
-openpyxl
-sqlalchemy==1.3.23
-WTForms-Alchemy
+marshmallow-dataclass
 colorama
 structlog
 python-dotenv
 
-psycopg2-binary
-SQLAlchemy-Utils
-SQLAlchemy-serializer
-GeoAlchemy2
+#psycopg2-binary
 
 requests
-pandas
-numpy
 
 # Development dependencies
 mypy
-pylint-flask-sqlalchemy
 pylint-flask
 pip-tools
 black

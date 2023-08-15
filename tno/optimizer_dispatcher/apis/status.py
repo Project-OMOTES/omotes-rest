@@ -10,4 +10,4 @@ api = Blueprint("status", "status", url_prefix="/status")
 @api.route("/")
 class Status(MethodView):
     def get(self):
-        return ""
+        return "OK", 200

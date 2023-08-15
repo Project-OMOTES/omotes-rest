@@ -2,8 +2,8 @@ import json
 from time import strftime
 
 from flask import request, send_from_directory
-from tno.flask_rest_api import create_app, db
-from tno.flask_rest_api.settings import EnvSettings
+from tno.optimizer_dispatcher import create_app
+from tno.optimizer_dispatcher.settings import EnvSettings
 
 from tno.shared.log import get_logger
 from werkzeug.exceptions import HTTPException
@@ -17,12 +17,9 @@ from werkzeug.exceptions import HTTPException
 # warnings.filterwarnings("error")
 
 
-logger = get_logger("tno.flask_rest_api.main")
+logger = get_logger("tno.optimizer_dispatcher.main")
 
-app = create_app("tno.flask_rest_api.settings.%sConfig" % EnvSettings.env().capitalize())
-
-import tno.flask_rest_api.commands  # noqa
-
+app = create_app("tno.optimizer_dispatcher.settings.%sConfig" % EnvSettings.env().capitalize())
 
 @app.after_request
 def after_request(response):
@@ -69,5 +66,5 @@ if __name__ == "__main__":
     app.run(
         host=EnvSettings.flask_server_host(),
         port=EnvSettings.flask_server_port(),
-        use_reloader=False,
+        use_reloader=not EnvSettings.is_production(),
     )

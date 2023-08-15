@@ -6,7 +6,7 @@ services:
     image: ci.tno.nl/flask-rest-api:dev
     volumes:
       - .:/code
-    command: ["gunicorn", "--reload", "tno.flask_rest_api.main:app", "-t 300", "-w 1", "-b :9200"]
+    command: ["gunicorn", "--reload", "tno.optimizer_dispatcher.main:app", "-t 300", "-w 1", "-b :9200"]
     ports:
       - "9200:9200"
     env_file:
