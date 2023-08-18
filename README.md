@@ -1,3 +1,9 @@
+# ESDL MapEditor NWN Dispatcher
+This webservice allows the MapEditor to call the NWN SDK to submit new workflow jobs, see their status and retrieve the results.
+
+The webservice is based on TNOs Flask REST API Template.
+
+
 # Flask REST API Template
 
 This is a skeleton application for a REST API. It contains a modular setup that should prevent annoying circular imports

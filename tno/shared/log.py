@@ -3,7 +3,7 @@ import logging.config
 
 from typing import List, Any
 import structlog
-from tno.optimizer_dispatcher.settings import EnvSettings
+from tno.mapeditor_dispatcher.settings import EnvSettings
 from structlog.threadlocal import merge_threadlocal
 
 timestamper = structlog.processors.TimeStamper(fmt="iso")

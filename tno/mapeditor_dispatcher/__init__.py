@@ -32,8 +32,8 @@ def create_app(object_name):
     api.init_app(app)
 
     # Register blueprints.
-    from tno.optimizer_dispatcher.apis.status import api as status_api
-    from tno.optimizer_dispatcher.apis.dispatch import api as dispatch_api
+    from tno.mapeditor_dispatcher.apis.status import api as status_api
+    from tno.mapeditor_dispatcher.apis.dispatch import api as dispatch_api
 
     api.register_blueprint(status_api)
     api.register_blueprint(dispatch_api)

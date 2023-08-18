@@ -2,8 +2,8 @@ import json
 from time import strftime
 
 from flask import request, send_from_directory
-from tno.optimizer_dispatcher import create_app
-from tno.optimizer_dispatcher.settings import EnvSettings
+from tno.mapeditor_dispatcher import create_app
+from tno.mapeditor_dispatcher.settings import EnvSettings
 
 from tno.shared.log import get_logger
 from werkzeug.exceptions import HTTPException
@@ -17,9 +17,24 @@ from werkzeug.exceptions import HTTPException
 # warnings.filterwarnings("error")
 
 
-logger = get_logger("tno.optimizer_dispatcher.main")
+logger = get_logger("tno.mapeditor_dispatcher.main")
 
-app = create_app("tno.optimizer_dispatcher.settings.%sConfig" % EnvSettings.env().capitalize())
+app = create_app("tno.mapeditor_dispatcher.settings.%sConfig" % EnvSettings.env().capitalize())
+
+@app.before_request
+def before_request():
+    timestamp = strftime("[%Y-%b-%d %H:%M]")
+    logger.debug(
+        "Request",
+        timestamp=timestamp,
+        remote_addr=request.remote_addr,
+        method=request.method,
+        scheme=request.scheme,
+        full_path=request.full_path,
+        payload=request.get_data(),
+        headers=request.headers,
+    )
+    #return response
 
 @app.after_request
 def after_request(response):
