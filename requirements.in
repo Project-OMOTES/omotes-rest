@@ -15,6 +15,10 @@ python-dotenv
 
 requests
 
+nwnsdk
+SQLAlchemy
+sqlalchemy-stubs
+
 # Development dependencies
 mypy
 pylint-flask

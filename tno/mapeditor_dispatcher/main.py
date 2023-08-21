@@ -3,6 +3,7 @@ from time import strftime
 
 from flask import request, send_from_directory
 from tno.mapeditor_dispatcher import create_app
+from tno.mapeditor_dispatcher.database import initialize_db
 from tno.mapeditor_dispatcher.settings import EnvSettings
 
 from tno.shared.log import get_logger
@@ -21,6 +22,7 @@ logger = get_logger("tno.mapeditor_dispatcher.main")
 
 app = create_app("tno.mapeditor_dispatcher.settings.%sConfig" % EnvSettings.env().capitalize())
 
+
 @app.before_request
 def before_request():
     timestamp = strftime("[%Y-%b-%d %H:%M]")
@@ -34,7 +36,8 @@ def before_request():
         payload=request.get_data(),
         headers=request.headers,
     )
-    #return response
+    # return response
+
 
 @app.after_request
 def after_request(response):
@@ -78,6 +81,9 @@ def handle_500(e):
 
 
 if __name__ == "__main__":
+    logger.warn("Started")
+    initialize_db("nwn")
+    logger.warn("DB started")
     app.run(
         host=EnvSettings.flask_server_host(),
         port=EnvSettings.flask_server_port(),

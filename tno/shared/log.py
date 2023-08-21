@@ -1,4 +1,3 @@
-import logging
 import logging.config
 
 from typing import List, Any
@@ -55,9 +54,7 @@ logging.config.dictConfig(
 
 
 structlog.configure(
-    processors=[merge_threadlocal]
-    + shared_processors
-    + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
+    processors=[merge_threadlocal] + shared_processors + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
     logger_factory=structlog.stdlib.LoggerFactory(),
     cache_logger_on_first_use=True,
 )
