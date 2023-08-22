@@ -6,7 +6,6 @@ from tno.shared.log import get_logger
 logger = get_logger(__name__)
 
 
-
 def timed(func):
     """This decorator prints the execution time for the decorated function."""
 

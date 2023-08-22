@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from flask import Blueprint, Flask
 from flask_cors import CORS
 
@@ -32,11 +34,11 @@ def create_app(object_name):
     api.init_app(app)
 
     # Register blueprints.
-    from tno.mapeditor_dispatcher.apis.status import api as status_api
-    from tno.mapeditor_dispatcher.apis.dispatch import api as dispatch_api
+    # from tno.mapeditor_dispatcher.apis.status import api as status_api
+    from tno.mapeditor_dispatcher.apis.job import api as job_api
 
-    api.register_blueprint(status_api)
-    api.register_blueprint(dispatch_api)
+    # api.register_blueprint(status_api)
+    api.register_blueprint(job_api)
 
     CORS(app, resources={r"/*": {"origins": "*"}})
 
