@@ -3,7 +3,7 @@ from time import strftime
 
 from flask import request, send_from_directory
 from tno.mapeditor_dispatcher import create_app
-from tno.mapeditor_dispatcher.database import initialize_db
+# from tno.mapeditor_dispatcher.database import initialize_db
 from tno.mapeditor_dispatcher.settings import EnvSettings
 
 from tno.shared.log import get_logger
@@ -81,9 +81,7 @@ def handle_500(e):
 
 
 if __name__ == "__main__":
-    logger.warn("Started")
-    initialize_db("nwn")
-    logger.warn("DB started")
+    # initialize_db("nwn")
     app.run(
         host=EnvSettings.flask_server_host(),
         port=EnvSettings.flask_server_port(),
