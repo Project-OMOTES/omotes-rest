@@ -8,8 +8,8 @@ from flask_smorest import Blueprint
 
 from flask.views import MethodView
 
-from tno.mapeditor_dispatcher.database import session_scope
-from tno.mapeditor_dispatcher.dbmodels import NwnJob
+# from tno.mapeditor_dispatcher.database import session_scope
+# from tno.mapeditor_dispatcher.dbmodels import NwnJob
 from tno.mapeditor_dispatcher.settings import EnvSettings
 from tno.shared.log import get_logger
 from nwnsdk import NwnClient, PostgresConfig, RabbitmqConfig, WorkFlowType, JobStatus
@@ -110,9 +110,9 @@ class JobAPI(MethodView):
         job_id = nwn_client.start_work_flow(
             request.work_flow_type, request.job_name, request.input_esdl, request.user_name, request.project_name
         )
-        with session_scope() as session:
-            new_job = NwnJob(job_id=job_id, user_name=request.user_name, project_name=request.project_name)
-            session.add(new_job)
+        # with session_scope() as session:
+        #     new_job = NwnJob(job_id=job_id, user_name=request.user_name, project_name=request.project_name)
+        #     session.add(new_job)
 
         return JobStatusResponse(job_id=job_id, status=JobStatus.REGISTERED)
 
