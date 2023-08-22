@@ -42,8 +42,8 @@ class JobInput:
     job_name: str
     work_flow_type: WorkFlowType
     user_name: str
-    project_name: str
     input_esdl: str
+    project_name: Optional[str] = field(metadata=dict(required=False))
     input_config: Optional[Dict] = field(metadata=dict(required=False))
 
 
