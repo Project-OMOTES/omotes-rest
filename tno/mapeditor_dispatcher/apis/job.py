@@ -1,3 +1,4 @@
+import base64
 import uuid
 from dataclasses import field
 from datetime import datetime
@@ -113,7 +114,7 @@ class JobAPI(MethodView):
         # with session_scope() as session:
         #     new_job = NwnJob(job_id=job_id, user_name=request.user_name, project_name=request.project_name)
         #     session.add(new_job)
-
+        # TODO retrieve status from DB, as it could be already in error mode
         return JobStatusResponse(job_id=job_id, status=JobStatus.REGISTERED)
 
     @api.response(200, JobSummary.Schema(many=True))
@@ -158,7 +159,9 @@ class JobResultAPI(MethodView):
         """
         Return job result
         """
-        return JobResultResponse(job_id=job_id, output_esdl=nwn_client.get_job_output_esdl(job_id))
+        output_esdl=nwn_client.get_job_output_esdl(job_id)
+        b64_esdl = base64.b64encode(bytes(output_esdl, 'utf-8')).decode('utf-8')
+        return JobResultResponse(job_id=job_id, output_esdl=b64_esdl)
 
 
 @api.route("/<string:job_id>/logs")
