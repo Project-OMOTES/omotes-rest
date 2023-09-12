@@ -1,12 +1,9 @@
 version: "3.8"
 
 services:
-  flask-rest-api:
+  mapeditor-nwn-dispatcher:
     build: .
-    image: ci.tno.nl/flask-rest-api:dev
-    volumes:
-      - .:/code
-    command: ["gunicorn", "--preload", "tno.mapeditor_dispatcher.main:app", "-t 300", "-w 1", "-b :9200"]
+    image: mvrijlandt/mapeditor_nwn_dispatcher:0.0.2
     ports:
       - "9200:9200"
     env_file:

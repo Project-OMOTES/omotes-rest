@@ -50,7 +50,7 @@ class EnvSettings:
 
     @staticmethod
     def nwn_postgres_port() -> int:
-        return int(os.getenv("NWN_POSTGRES_PORT", "5432"))
+        return int(os.getenv("NWN_POSTGRES_PORT", "6432"))
 
     @staticmethod
     def nwn_postgres_database_name() -> str:
