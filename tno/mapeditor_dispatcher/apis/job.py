@@ -33,6 +33,7 @@ rabbitmq_config = RabbitmqConfig(
     EnvSettings.nwn_rabbitmq_hipe_compile(),
 )
 nwn_client = NwnClient(postgres_config, rabbitmq_config)
+nwn_client.connect()
 api = Blueprint(
     "Job", "Job", url_prefix="/job", description="NWN jobs: start, check status and get overview and results"
 )
@@ -111,11 +112,8 @@ class JobAPI(MethodView):
         job_id = nwn_client.start_work_flow(
             request.work_flow_type, request.job_name, request.input_esdl, request.user_name, request.project_name
         )
-        # with session_scope() as session:
-        #     new_job = NwnJob(job_id=job_id, user_name=request.user_name, project_name=request.project_name)
-        #     session.add(new_job)
-        # TODO retrieve status from DB, as it could be already in error mode
-        return JobStatusResponse(job_id=job_id, status=JobStatus.REGISTERED)
+        job_status = nwn_client.get_job_status(job_id)
+        return JobStatusResponse(job_id=job_id, status=job_status)
 
     @api.response(200, JobSummary.Schema(many=True))
     def get(self):
@@ -159,8 +157,8 @@ class JobResultAPI(MethodView):
         """
         Return job result
         """
-        output_esdl=nwn_client.get_job_output_esdl(job_id)
-        b64_esdl = base64.b64encode(bytes(output_esdl, 'utf-8')).decode('utf-8')
+        output_esdl = nwn_client.get_job_output_esdl(job_id)
+        b64_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
         return JobResultResponse(job_id=job_id, output_esdl=b64_esdl)
 
 

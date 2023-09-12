@@ -1,7 +1,7 @@
 FROM python:3.10-slim
 
 ENV ENV=prod
-ENV FLASK_APP=tno/flask_rest_api/main.py
+ENV FLASK_APP=tno/mapeditor_dispatcher/main.py
 
 RUN apt-get update && apt-get install -y curl git
 
@@ -13,8 +13,8 @@ WORKDIR /code
 RUN touch .env
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Only now copy the code into the container. Everything before this will be cached
-# even with code changes.
 COPY . /code
 
 RUN pip install -e .
+
+CMD gunicorn --preload tno.mapeditor_dispatcher.main:app -t 300 -w 1 -b :9200
