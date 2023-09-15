@@ -3,7 +3,8 @@ FROM python:3.10-slim
 ENV ENV=prod
 ENV FLASK_APP=tno/mapeditor_dispatcher/main.py
 
-RUN apt-get update && apt-get install -y curl git
+RUN apt-get -y update
+RUN pip3.7 install --upgrade pip
 
 # Install Python dependencies.
 COPY requirements.txt /code/
