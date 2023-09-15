@@ -1,6 +1,6 @@
 [project]
 name = "mapeditor-nwn-dispatcher"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
     { name = "Ewoud Werkman (TNO)", email = "ewoud.werkman@tno.nl" },
     { name = "Mark Vrijlandt (TNO)", email = "mark.vrijlandt@tno.nl" }

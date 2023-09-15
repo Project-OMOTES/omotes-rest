@@ -4,7 +4,7 @@ ENV ENV=prod
 ENV FLASK_APP=tno/mapeditor_dispatcher/main.py
 
 RUN apt-get -y update
-RUN pip3.7 install --upgrade pip
+RUN pip install --upgrade pip
 
 # Install Python dependencies.
 COPY requirements.txt /code/
