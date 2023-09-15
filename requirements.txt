@@ -11,9 +11,7 @@ blinker==1.6.2
 click==8.1.7
     # via flask
 colorama==0.4.6
-    # via
-    #   click
-    #   mapeditor-nwn-dispatcher (./pyproject.toml)
+    # via mapeditor-nwn-dispatcher (./pyproject.toml)
 flask==2.3.3
     # via
     #   flask-cors
@@ -55,7 +53,7 @@ mypy-extensions==1.0.0
     # via
     #   mypy
     #   typing-inspect
-nwnsdk==0.0.6.post1
+nwnsdk==0.0.7
     # via mapeditor-nwn-dispatcher (./pyproject.toml)
 packaging==23.1
     # via
