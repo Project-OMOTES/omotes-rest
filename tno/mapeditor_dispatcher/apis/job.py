@@ -1,5 +1,7 @@
 import base64
+import time
 import uuid
+
 from dataclasses import field
 from datetime import datetime
 from typing import Optional, Dict
@@ -32,8 +34,7 @@ rabbitmq_config = RabbitmqConfig(
     EnvSettings.nwn_rabbitmq_password(),
     EnvSettings.nwn_rabbitmq_hipe_compile(),
 )
-nwn_client = NwnClient(postgres_config, rabbitmq_config)
-nwn_client.connect()
+
 api = Blueprint(
     "Job", "Job", url_prefix="/job", description="NWN jobs: start, check status and get overview and results"
 )
@@ -109,10 +110,13 @@ class JobAPI(MethodView):
         """
         Start new job
         """
-        job_id = nwn_client.start_work_flow(
-            request.work_flow_type, request.job_name, request.input_esdl, request.user_name, request.project_name
-        )
-        job_status = nwn_client.get_job_status(job_id)
+
+        with NwnClientScope() as nwn_client:
+            job_id = nwn_client.start_work_flow(
+                request.work_flow_type, request.job_name, request.input_esdl, request.user_name, request.project_name
+            )
+            time.sleep(0.2)
+            job_status = nwn_client.get_job_status(job_id)
         return JobStatusResponse(job_id=job_id, status=job_status)
 
     @api.response(200, JobSummary.Schema(many=True))
@@ -120,7 +124,9 @@ class JobAPI(MethodView):
         """
         Return all jobs
         """
-        return nwn_client.get_all_jobs()
+        with NwnClientScope() as nwn_client:
+            jobs = nwn_client.get_all_jobs()
+        return jobs
 
 
 @api.route("/<string:job_id>")
@@ -130,14 +136,18 @@ class JobFromIdAPI(MethodView):
         """
         Return job details
         """
-        return nwn_client.get_job_details(job_id)
+        with NwnClientScope() as nwn_client:
+            job_details = nwn_client.get_job_details(job_id)
+        return job_details
 
     @api.response(200, JobDeleteResponse.Schema())
     def delete(self, job_id: int):
         """
         Delete job
         """
-        return JobDeleteResponse(job_id=job_id, deleted=nwn_client.delete_job(job_id))
+        with NwnClientScope() as nwn_client:
+            deleted_id = nwn_client.delete_job(job_id)
+        return JobDeleteResponse(job_id=job_id, deleted=deleted_id)
 
 
 @api.route("/<string:job_id>/status")
@@ -147,7 +157,9 @@ class JobStatusAPI(MethodView):
         """
         Return job status
         """
-        return JobStatusResponse(job_id=job_id, status=nwn_client.get_job_status(job_id))
+        with NwnClientScope() as nwn_client:
+            status = nwn_client.get_job_status(job_id)
+        return JobStatusResponse(job_id=job_id, status=status)
 
 
 @api.route("/<string:job_id>/result")
@@ -157,7 +169,8 @@ class JobResultAPI(MethodView):
         """
         Return job result
         """
-        output_esdl = nwn_client.get_job_output_esdl(job_id)
+        with NwnClientScope() as nwn_client:
+            output_esdl = nwn_client.get_job_output_esdl(job_id)
         b64_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
         return JobResultResponse(job_id=job_id, output_esdl=b64_esdl)
 
@@ -169,7 +182,9 @@ class JobLogsAPI(MethodView):
         """
         Return job logs
         """
-        return JobLogsResponse(job_id=job_id, logs=nwn_client.get_job_logs(job_id))
+        with NwnClientScope() as nwn_client:
+            logs = nwn_client.get_job_logs(job_id)
+        return JobLogsResponse(job_id=job_id, logs=logs)
 
 
 @api.route("/user/<string:user_name>")
@@ -179,7 +194,9 @@ class JobsByUserAPI(MethodView):
         """
         Return all jobs from user
         """
-        return nwn_client.get_jobs_from_user(user_name)
+        with NwnClientScope() as nwn_client:
+            jobs = nwn_client.get_jobs_from_user(user_name)
+        return jobs
 
 
 @api.route("/project/<string:project_name>")
@@ -189,4 +206,18 @@ class JobByProjectAPI(MethodView):
         """
         Return all jobs from project
         """
-        return nwn_client.get_jobs_from_project(project_name)
+        with NwnClientScope() as nwn_client:
+            jobs = nwn_client.get_jobs_from_project(project_name)
+        return jobs
+
+
+class NwnClientScope:
+    nwn_client: NwnClient
+
+    def __enter__(self):
+        self.nwn_client = NwnClient(postgres_config, rabbitmq_config)
+        self.nwn_client.connect()
+        return self.nwn_client
+
+    def __exit__(self, exc_type, exc, exc_tb):
+        self.nwn_client.stop()
