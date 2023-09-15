@@ -18,4 +18,4 @@ COPY . /code
 
 RUN pip install -e .
 
-CMD gunicorn --preload tno.mapeditor_dispatcher.main:app -t 300 -w 1 -b :9200
+CMD gunicorn tno.mapeditor_dispatcher.main:app -t 300 -w 1 -b :9200
