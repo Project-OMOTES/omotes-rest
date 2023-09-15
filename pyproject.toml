@@ -1,6 +1,6 @@
 [project]
 name = "mapeditor-nwn-dispatcher"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
     { name = "Ewoud Werkman (TNO)", email = "ewoud.werkman@tno.nl" },
     { name = "Mark Vrijlandt (TNO)", email = "mark.vrijlandt@tno.nl" }
@@ -20,7 +20,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 
 dependencies = [
     "colorama ~= 0.4.6",

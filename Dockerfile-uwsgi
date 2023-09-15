@@ -1,21 +1,22 @@
-FROM python:3.10-slim
+FROM python:3.8-slim
 
 ENV ENV=prod
 ENV FLASK_APP=tno/mapeditor_dispatcher/main.py
 
 RUN apt-get -y update
+RUN apt-get install -y gcc libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev
 RUN pip install --upgrade pip
 
 # Install Python dependencies.
-COPY requirements.txt /code/
+COPY requirements-uwsgi.txt /code/
 
 WORKDIR /code
 # To avoid warning from flask dotenv.
 RUN touch .env
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements-uwsgi.txt
 
 COPY . /code
 
 RUN pip install -e .
 
-CMD gunicorn tno.mapeditor_dispatcher.main:app -t 300 -w 1 -b :9200
+CMD uwsgi uwsgi/uwsgi-long-polling.ini
