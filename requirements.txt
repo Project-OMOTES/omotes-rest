@@ -55,7 +55,7 @@ mypy-extensions==1.0.0
     # via
     #   mypy
     #   typing-inspect
-nwnsdk==0.0.8
+nwnsdk==0.0.9
     # via mapeditor-nwn-dispatcher (./pyproject.toml)
 packaging==23.1
     # via
