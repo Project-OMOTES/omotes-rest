@@ -1,11 +1,11 @@
 [project]
-name = "mapeditor-nwn-dispatcher"
+name = "omotes-rest"
 dynamic = ["version"]
 authors = [
     { name = "Ewoud Werkman (TNO)", email = "ewoud.werkman@tno.nl" },
     { name = "Mark Vrijlandt (TNO)", email = "mark.vrijlandt@tno.nl" }
 ]
-description = "MapEditor - NWN dispatcher"
+description = "Omotes - REST"
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
@@ -31,12 +31,12 @@ dependencies = [
     "gunicorn ~= 21.2.0",
     "marshmallow ~= 3.20.1",
     "marshmallow-dataclass ~= 8.5.14",
-    "nwnsdk == 0.0.11",
-    "pika ~= 1.3.2",
+    "marshmallow-enum ~= 1.5.1",
     "python-dotenv ~= 1.0.0",
     "structlog ~= 23.1.0",
-    "SQLAlchemy == 2.0.19",
+    "SQLAlchemy == 2.0.28",
     "sqlalchemy-stubs == 0.4",
+    "omotes-sdk-python ~= 0.0.12",
 ]
 
 [project.urls]

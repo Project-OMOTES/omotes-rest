@@ -1,8 +1,9 @@
-# ESDL MapEditor NWN Dispatcher
-This webservice allows the MapEditor to call the NWN SDK to submit new workflow jobs, see their status and retrieve the results.
+# Omotes REST service
+
+This webservice allows the MapEditor to call the Omotes SDK to submit new workflow jobs, see their status and retrieve
+the results.
 
 The webservice is based on TNOs Flask REST API Template.
-
 
 # Flask REST API Template
 

@@ -5,10 +5,10 @@ from sqlalchemy import create_engine, orm
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import Session as SQLSession
 
-from tno.mapeditor_dispatcher.settings import EnvSettings
-from tno.shared.log import get_logger
+from src.omotes_rest.settings import EnvSettings
+from omotes_rest.log import get_logger
 
-logger = get_logger(__name__)
+logger = get_logger("omotes_rest")
 
 session_factory = orm.sessionmaker()
 Session = orm.scoped_session(session_factory)

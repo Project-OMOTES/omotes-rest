@@ -94,7 +94,7 @@ class Config(object):
 
     SECRET_KEY = secrets.token_urlsafe(16)
 
-    API_TITLE = "MapEditor NWN Dispatcher REST API"
+    API_TITLE = "Omotes REST API"
     API_VERSION = "v1"
     OPENAPI_VERSION = "3.0.2"
     OPENAPI_URL_PREFIX = "/"
@@ -105,7 +105,7 @@ class Config(object):
 
     API_SPEC_OPTIONS = {
         "info": {
-            "description": "This is the TNO MapEditor NWN dispatcher service API.",
+            "description": "This is the Omotes REST service API.",
             "termsOfService": "https://www.tno.nl",
             "contact": {"email": "ewoud.werkman@tno.nl"},
             # "license": {"name": "TBD", "url": "https://www.tno.nl"},

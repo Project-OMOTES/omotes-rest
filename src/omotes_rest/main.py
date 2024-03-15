@@ -2,11 +2,11 @@ import json
 from time import strftime
 
 from flask import request, send_from_directory
-from tno.mapeditor_dispatcher import create_app
-# from tno.mapeditor_dispatcher.database import initialize_db
-from tno.mapeditor_dispatcher.settings import EnvSettings
+from src.omotes_rest import create_app
+# from src.omotes_rest.database import initialize_db
+from src.omotes_rest.settings import EnvSettings
 
-from tno.shared.log import get_logger
+from omotes_rest.log import get_logger
 from werkzeug.exceptions import HTTPException
 
 # Convert warnings into exceptions
@@ -18,9 +18,9 @@ from werkzeug.exceptions import HTTPException
 # warnings.filterwarnings("error")
 
 
-logger = get_logger("tno.mapeditor_dispatcher.main")
+logger = get_logger("src.omotes_rest.main")
 
-app = create_app("tno.mapeditor_dispatcher.settings.%sConfig" % EnvSettings.env().capitalize())
+app = create_app("src.omotes_rest.settings.%sConfig" % EnvSettings.env().capitalize())
 
 
 @app.before_request
@@ -80,10 +80,14 @@ def handle_500(e):
     return json.dumps({"message": "Internal Server Error"}), 500
 
 
-if __name__ == "__main__":
+def main() -> None:
     # initialize_db("nwn")
     app.run(
         host=EnvSettings.flask_server_host(),
         port=EnvSettings.flask_server_port(),
         use_reloader=not EnvSettings.is_production(),
     )
+
+
+if __name__ == "__main__":
+    main()

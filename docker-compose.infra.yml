@@ -1,28 +1,52 @@
 version: "3.8"
 
-services:
-  postgis:
-    image: postgis/postgis:latest
-    env_file:
-      - ".env"
-    environment:
-      POSTGRES_DB: ${POSTGIS_DATABASE_NAME}
-      POSTGRES_USER: ${POSTGIS_ROOT_USER}
-      POSTGRES_PASSWORD: ${POSTGIS_ROOT_PASSWORD}
-    ports:
-      - "9232:5432"
-    volumes:
-      - "./postgres_db/initdb.d/:/docker-entrypoint-initdb.d"
-      - "postgis-data:/var/lib/postgresql/data"
-    restart: unless-stopped
-
-#  pgadminer:
-#    image: adminer
-#    environment:
-#      - ADMINER_DESIGN=lucas-sandery
-#      - ADMINER_DEFAULT_SERVER=postgis
-#    ports:
-#      - "9280:8080"
+networks:
+  omotes:
 
 volumes:
-  postgis-data:
+  db-data:
+
+services:
+  rest_postgres_db: &rest_postgres_db
+    image: postgres:15.4
+    restart: unless-stopped
+    volumes:
+      - "db-data:/var/lib/postgresql/data/"
+    networks:
+      - omotes
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: omotes
+      POSTGRES_USER: ${POSTGRES_ROOT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_ROOT_USER}", "-d", "omotes" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "${POSTGRESQL_PORT}:5432"
+
+  # Skipped in 'docker-compose up', only used to develop database revisions.
+  rest_postgres_db_dev:
+    <<: *rest_postgres_db
+    ports:
+      - "${POSTGRES_DEV_PORT}:5432"
+    profiles:
+      - manual_dev
+
+  # Skipped in 'docker-compose up', only used in 'setup.sh'
+  rest_postgres_db_upgrade:
+    build: postgres_db_upgrade
+    networks:
+      - omotes
+    environment:
+      POSTGRES_ROOT_USER: ${POSTGRES_ROOT_USER}
+      POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+      POSTGRES_HOST: rest_postgres_db
+      POSTGRES_PORT: 5432
+    depends_on:
+      rest_postgres_db:
+        condition: service_healthy
+    profiles:
+      - manual_setup
