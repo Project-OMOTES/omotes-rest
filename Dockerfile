@@ -1,7 +1,7 @@
 FROM python:3.10-slim
 
 ENV ENV=prod
-ENV FLASK_APP=tno/mapeditor_dispatcher/main.py
+ENV FLASK_APP=src/omotes_rest/main.py
 
 RUN apt-get -y update
 RUN pip install --upgrade pip
@@ -18,4 +18,4 @@ COPY . /code
 
 RUN pip install -e .
 
-CMD gunicorn src.mapeditor_dispatcher.main:app -t 300 -w 1 -b :9200
+CMD gunicorn omotes_rest.main:app -t 300 -w 1 -b :9200 --pythonpath src

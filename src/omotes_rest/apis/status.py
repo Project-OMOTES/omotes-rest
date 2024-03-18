@@ -1,6 +1,6 @@
 # from flask_smorest import Blueprint
 # from flask.views import MethodView
-# from src.shared.log import get_logger
+# from shared.log import get_logger
 #
 # logger = get_logger("omotes_rest")
 #

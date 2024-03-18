@@ -31,7 +31,7 @@ def handle_on_job_finished(job: Job, result: JobResult) -> None:
     postgres_if.set_job_status(
         job_id=job.id,
         new_status=3,  # FINISHED
-        result_type=result.result_type,
+        result=result,
     )
 
 

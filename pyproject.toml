@@ -28,6 +28,7 @@ dependencies = [
     "Flask-Cors ~= 4.0.0",
     "Flask-DotEnv ~= 0.1.2",
     "flask-smorest ~= 0.42.0",
+    "psycopg2-binary==2.9.3",
     "gunicorn ~= 21.2.0",
     "marshmallow ~= 3.20.1",
     "marshmallow-dataclass ~= 8.5.14",

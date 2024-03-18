@@ -1,7 +1,7 @@
 FROM python:3.8-slim
 
 ENV ENV=prod
-ENV FLASK_APP=tno/mapeditor_dispatcher/main.py
+ENV FLASK_APP=src/omotes_rest/main.py
 
 RUN apt-get -y update
 RUN apt-get install -y gcc libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev

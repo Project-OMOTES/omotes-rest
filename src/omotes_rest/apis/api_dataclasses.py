@@ -20,9 +20,7 @@ class JobRestStatus(Enum):
     this state is not defined in this `Enum`.
     """
     REGISTERED = "registered"
-    """Job is registered but not yet submitted to Celery."""
-    ENQUEUED = "enqueued"
-    """Job is submitted to Celery but not yet started."""
+    """Job is registered but not yet running."""
     RUNNING = "running"
     """Job is started and waiting to complete."""
     SUCCEEDED = "succeeded"

@@ -2,9 +2,8 @@ import json
 from time import strftime
 
 from flask import request, send_from_directory
-from src.omotes_rest import create_app
-# from src.omotes_rest.database import initialize_db
-from src.omotes_rest.settings import EnvSettings
+from omotes_rest import create_app
+from omotes_rest.settings import EnvSettings
 
 from omotes_rest.log import get_logger
 from werkzeug.exceptions import HTTPException
@@ -81,7 +80,6 @@ def handle_500(e):
 
 
 def main() -> None:
-    # initialize_db("nwn")
     app.run(
         host=EnvSettings.flask_server_host(),
         port=EnvSettings.flask_server_port(),

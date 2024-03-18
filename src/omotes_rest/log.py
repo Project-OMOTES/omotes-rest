@@ -2,7 +2,7 @@ import logging.config
 
 from typing import List, Any
 import structlog
-from src.omotes_rest.settings import EnvSettings
+from omotes_rest.settings import EnvSettings
 from structlog.threadlocal import merge_threadlocal
 
 timestamper = structlog.processors.TimeStamper(fmt="iso")

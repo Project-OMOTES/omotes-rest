@@ -1,8 +1,8 @@
 """initial commit
 
-Revision ID: 50f731d37156
+Revision ID: 0b2b6ee9274d
 Revises: 
-Create Date: 2024-03-15 22:14:08.152971
+Create Date: 2024-03-18 10:20:54.447282
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '50f731d37156'
+revision: str = '0b2b6ee9274d'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,7 +24,7 @@ def upgrade() -> None:
     sa.Column('job_id', sa.UUID(), nullable=False),
     sa.Column('job_name', sa.String(), nullable=False),
     sa.Column('work_flow_name', sa.Enum('GROW_OPTIMIZER', 'GROW_SIMULATOR', 'GROW_OPTIMIZER_NO_HEAT_LOSSES', 'GROW_OPTIMIZER_NO_HEAT_LOSSES_DISCOUNTED_CAPEX', 'SIMULATOR', name='workflowname'), nullable=False),
-    sa.Column('status', sa.Enum('REGISTERED', 'ENQUEUED', 'RUNNING', 'SUCCEEDED', 'CANCELLED', 'TIMEOUT', 'ERROR', name='jobreststatus'), nullable=False),
+    sa.Column('status', sa.Enum('REGISTERED', 'RUNNING', 'SUCCEEDED', 'CANCELLED', 'TIMEOUT', 'ERROR', name='jobreststatus'), nullable=False),
     sa.Column('progress_fraction', sa.Float(), nullable=False),
     sa.Column('progress_message', sa.String(), nullable=False),
     sa.Column('registered_at', sa.DateTime(timezone=True), nullable=False),

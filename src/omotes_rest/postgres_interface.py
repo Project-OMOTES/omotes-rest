@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 from typing import Generator, Optional
 
+from omotes_sdk_protocol.job_pb2 import JobResult
 from sqlalchemy import select, update, delete, create_engine, orm
 from sqlalchemy.orm import Session as SQLSession
 from sqlalchemy.engine import Engine, URL
@@ -53,27 +54,32 @@ def initialize_db(application_name: str, config: PostgreSQLConfig) -> Engine:
     :param config: Configuration on how to connect to the SQL database.
     """
     LOGGER.info(
-        "Connecting to PostgresDB at %s:%s as user %s", config.host, config.port, config.username
-    )
-    url = URL.create(
-        "postgresql+psycopg2",
-        username=config.username,
-        password=config.password,
-        host=config.host,
-        port=config.port,
-        database=config.database,
+        "Connecting to PostgresDB at %s:%s as user %s to db %s", config.host, config.port,
+        config.username, config.database
     )
 
-    engine = create_engine(
-        url,
-        pool_size=20,
-        max_overflow=5,
-        echo=False,
-        connect_args={
-            "application_name": application_name,
-            "options": "-c lock_timeout=30000 -c statement_timeout=300000",  # 5 minutes
-        },
-    )
+    try:
+        url = URL.create(
+            "postgresql+psycopg2",
+            username=config.username,
+            password=config.password,
+            host=config.host,
+            port=config.port,
+            database=config.database,
+        )
+
+        engine = create_engine(
+            url,
+            pool_size=20,
+            max_overflow=5,
+            echo=False,
+            connect_args={
+                "application_name": application_name,
+                "options": "-c lock_timeout=30000 -c statement_timeout=300000",  # 5 minutes
+            },
+        )
+    except Exception as e:
+        LOGGER.error(e)
 
     # Bind the global session to the actual engine.
     Session.configure(bind=engine)
@@ -136,12 +142,12 @@ class PostgresInterface:
             session.add(new_job)
         LOGGER.debug("Job %s is submitted as new job in database", job_id)
 
-    def set_job_status(self, job_id: uuid.UUID, new_status: int, result_type: int = None) -> None:
+    def set_job_status(self, job_id: uuid.UUID, new_status: int, result: JobResult = None) -> None:
         """Set the status of the job to SUBMITTED.
 
         :param job_id: Job to set the status to SUBMITTED.
         :param new_status: new status 'int' identifier from protobuf message.
-        :param result_type: optional result type 'int' identifier from protobuf message.
+        :param result: optional result containing the result type, logs and output esdl.
         """
         LOGGER.debug("For job '%s' received new status '%s'", job_id, new_status)
 
@@ -171,23 +177,34 @@ class PostgresInterface:
                     )
                 )
             elif new_status == 3 or new_status == 4:  # FINISHED or CANCELLED
-                if result_type is None:  # Should this happen?
+                if result is None:  # Should this happen?
                     final_status = JobRestStatus.ERROR
-                elif result_type == 0:  # SUCCEEDED
+                elif result.result_type == 0:  # SUCCEEDED
                     final_status = JobRestStatus.SUCCEEDED
-                elif result_type == 1:  # TIMEOUT
+                elif result.result_type == 1:  # TIMEOUT
                     final_status = JobRestStatus.TIMEOUT
-                elif result_type == 2:  # ERROR
+                elif result.result_type == 2:  # ERROR
                     final_status = JobRestStatus.ERROR
-                elif result_type == 3:  # CANCELLED
+                elif result.result_type == 3:  # CANCELLED
                     final_status = JobRestStatus.CANCELLED
-                stmnt = (
-                    update(JobRest)
-                    .where(JobRest.job_id == job_id)
-                    .values(
-                        status=final_status, stopped_at=datetime.now()
+
+                if result:
+                    stmnt = (
+                        update(JobRest)
+                        .where(JobRest.job_id == job_id)
+                        .values(
+                            status=final_status, stopped_at=datetime.now(), logs=result.logs,
+                            output_esdl=result.output_esdl
+                        )
                     )
-                )
+                else:
+                    stmnt = (
+                        update(JobRest)
+                        .where(JobRest.job_id == job_id)
+                        .values(
+                            status=final_status, stopped_at=datetime.now()
+                        )
+                    )
             session.execute(stmnt)
 
         if result_type:
