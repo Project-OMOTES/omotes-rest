@@ -1,13 +1,12 @@
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 import sqlalchemy as db
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
 
-from omotes_rest.apis.api_dataclasses import WorkFlowName, JobRestStatus
+from omotes_rest.apis.api_dataclasses import JobRestStatus
 
 Base = declarative_base()
 
@@ -23,7 +22,7 @@ class JobRest(Base):
     """OMOTES identifier for the job."""
     job_name: str = db.Column(db.String, nullable=False)
     """Job name/description."""
-    work_flow_name: WorkFlowName = db.Column(db.Enum(WorkFlowName), nullable=False)
+    workflow_type: str = db.Column(db.String)
     """Name of the workflow this job runs."""
     status: JobRestStatus = db.Column(db.Enum(JobRestStatus), nullable=False)
     """Last received status of the job."""
@@ -33,11 +32,11 @@ class JobRest(Base):
     """Last received progress (fraction) of the job."""
     registered_at: datetime = db.Column(db.DateTime(timezone=True), nullable=False)
     """Time at which the job is registered."""
-    submitted_at: Optional[datetime] = db.Column(db.DateTime(timezone=True))
+    submitted_at: datetime | datetime = db.Column(db.DateTime(timezone=True))
     """Time at which the job is submitted to Celery."""
-    running_at: Optional[datetime] = db.Column(db.DateTime(timezone=True))
+    running_at: datetime | datetime = db.Column(db.DateTime(timezone=True))
     """Time at which a Celery worker has started the task for this job."""
-    stopped_at: Optional[datetime] = db.Column(db.DateTime(timezone=True))
+    stopped_at: datetime | datetime = db.Column(db.DateTime(timezone=True))
     """Time at which the job stopped: due to finish, error or cancel."""
     timeout_after_s: int = db.Column(db.Integer)
     """Duration the job may run for before being cancelled due to timing out."""
@@ -45,11 +44,11 @@ class JobRest(Base):
     """User name of job submitter."""
     project_name: str = db.Column(db.String, nullable=False)
     """Project name that the job belongs to."""
-    input_params_dict_str: str = db.Column(db.String)
-    """Dictionary of 'non-ESDL' input parameters as string."""
+    input_params_dict: dict = db.Column(db.JSON)
+    """Dictionary of 'non-ESDL' input parameters."""
     input_esdl: str = db.Column(db.String, nullable=False)
-    """Input ESDL as string."""
+    """Input ESDL as base64 encoded string."""
     output_esdl: str = db.Column(db.String)
-    """Output ESDL as string."""
+    """Output ESDL as base64 encoded string."""
     logs: str = db.Column(db.String)
     """Logs as string."""

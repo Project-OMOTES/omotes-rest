@@ -1,16 +1,11 @@
-import json
 import uuid
+from dataclasses import field
+from datetime import datetime
 from enum import Enum
+from typing import Any
+
 from marshmallow_dataclass import dataclass
-
-
-class WorkFlowName(Enum):
-    GROW_OPTIMIZER = "grow_optimizer"
-    GROW_SIMULATOR = "grow_simulator"
-    GROW_OPTIMIZER_NO_HEAT_LOSSES = "grow_optimizer_no_heat_losses"
-    GROW_OPTIMIZER_NO_HEAT_LOSSES_DISCOUNTED_CAPEX = "grow_optimizer_no_heat_losses" \
-                                                     "_discounted_capex"
-    SIMULATOR = "simulator"
+from marshmallow_dataclass import add_schema
 
 
 class JobRestStatus(Enum):
@@ -20,7 +15,9 @@ class JobRestStatus(Enum):
     this state is not defined in this `Enum`.
     """
     REGISTERED = "registered"
-    """Job is registered but not yet running."""
+    """Job is registered but not yet submitted to Celery."""
+    ENQUEUED = "enqueued"
+    """Job is submitted to Celery but not yet started."""
     RUNNING = "running"
     """Job is started and waiting to complete."""
     SUCCEEDED = "succeeded"
@@ -33,64 +30,94 @@ class JobRestStatus(Enum):
     """Job ended due to an error."""
 
 
+default_dict = {'key1': "value1", "key2": ["just", "a", "list", "with", "an", "integer", 3]}
+
+
+@add_schema
 @dataclass
 class JobInput:
     job_name: str = "job name"
-    work_flow_name: WorkFlowName = WorkFlowName.GROW_OPTIMIZER
+    workflow_type: str = "grow_optimizer"
     user_name: str = "user name"
-    input_esdl: str = "input ESDL string"
+    input_esdl: str = "input ESDL base64string"
     project_name: str = "project name"
-    input_params_dict_str: str = json.dumps(
-        {'key1': "value1", "key2": ["just", "a", "list", "with", "an", "integer", 3]})
+    input_params_dict: dict[str, Any] = field(default_factory=dict)
     timeout_after_s: int = 3600
 
 
+@add_schema
+@dataclass
+class JobCancelInput:
+    job_id: uuid.UUID
+
+
+@add_schema
 @dataclass
 class JobStatusResponse:
     job_id: uuid.UUID
     status: JobRestStatus
 
-# @dataclass
-# class JobResultResponse:
-#     job_id: uuid.UUID
-#     output_esdl: Optional[str]
-#
-#
-# @dataclass
-# class JobDeleteResponse:
-#     job_id: uuid.UUID
-#     deleted: bool
-#
-#
-# @dataclass
-# class JobLogsResponse:
-#     job_id: uuid.UUID
-#     logs: Optional[str]
-#
-#
-# @dataclass
-# class JobDetailsResponse:
-#     job_id: uuid.UUID
-#     job_name: str
-#     work_flow_type: str
-#     user_name: str
-#     project_name: str
-#     status: JobStatus
-#     input_config: str
-#     input_esdl: str
-#     output_esdl: Optional[str]
-#     added_at: datetime
-#     running_at: Optional[datetime]
-#     stopped_at: Optional[datetime]
-#     logs: Optional[str]
-#
-#
-# @dataclass
-# class JobSummary:
-#     job_id: uuid.UUID
-#     job_name: str
-#     user_name: str
-#     project_name: str
-#     status: JobStatus
-#     added_at: datetime
-#     stopped_at: Optional[datetime]
+
+@add_schema
+@dataclass
+class JobResultResponse:
+    job_id: uuid.UUID
+    output_esdl: str | None
+
+
+@add_schema
+@dataclass
+class JobDeleteResponse:
+    job_id: uuid.UUID
+    deleted: bool
+
+
+@add_schema
+@dataclass
+class JobCancelResponse:
+    job_id: uuid.UUID
+    cancelled: bool
+
+
+@add_schema
+@dataclass
+class JobLogsResponse:
+    job_id: uuid.UUID
+    logs: str | None
+
+
+@add_schema
+@dataclass
+class JobResponse:
+    job_id: uuid.UUID
+    job_name: str
+    workflow_type: str
+    status: JobRestStatus
+    progress_fraction: float
+    progress_message: str
+    registered_at: datetime
+    submitted_at: datetime | datetime
+    running_at: datetime | datetime
+    stopped_at: datetime | datetime
+    timeout_after_s: int
+    user_name: str
+    project_name: str
+    input_params_dict: dict
+    input_esdl: str
+    output_esdl: str
+    logs: str
+
+
+@add_schema
+@dataclass
+class JobSummary:
+    job_id: uuid.UUID
+    job_name: str
+    workflow_type: str
+    status: JobRestStatus
+    progress_fraction: float
+    registered_at: datetime
+    running_at: datetime | datetime
+    stopped_at: datetime | datetime
+    user_name: str
+    project_name: str

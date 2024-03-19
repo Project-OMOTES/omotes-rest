@@ -2,22 +2,15 @@ import json
 from time import strftime
 
 from flask import request, send_from_directory
-from omotes_rest import create_app
-from omotes_rest.settings import EnvSettings
-
-from omotes_rest.log import get_logger
 from werkzeug.exceptions import HTTPException
 
-# Convert warnings into exceptions
-# import sys
-
-# if not sys.warnoptions:
-#     import warnings
-
-# warnings.filterwarnings("error")
+from omotes_rest import create_app
+from omotes_rest.settings import EnvSettings
+from omotes_rest.log import get_logger
+from omotes_sdk.workflow_type import WorkflowTypeManager, WorkflowType
 
 
-logger = get_logger("src.omotes_rest.main")
+logger = get_logger("omotes_rest")
 
 app = create_app("src.omotes_rest.settings.%sConfig" % EnvSettings.env().capitalize())
 
@@ -80,6 +73,31 @@ def handle_500(e):
 
 
 def main() -> None:
+    workflow_type_manager = WorkflowTypeManager(
+        possible_workflows=[
+            WorkflowType(
+                workflow_type_name="grow_optimizer", workflow_type_description_name="Grow Optimizer"
+            ),
+            WorkflowType(
+                workflow_type_name="grow_simulator", workflow_type_description_name="Grow Simulator"
+            ),
+            WorkflowType(
+                workflow_type_name="grow_optimizer_no_heat_losses",
+                workflow_type_description_name="Grow Optimizer without heat losses",
+            ),
+            WorkflowType(
+                workflow_type_name="grow_optimizer_no_heat_losses_discounted_capex",
+                workflow_type_description_name="Grow Optimizer without heat losses and a "
+                                               "discounted CAPEX",
+            ),
+            WorkflowType(
+                workflow_type_name="simulator",
+                workflow_type_description_name="High fidelity simulator",
+            ),
+        ]
+    )
+    app.workflow_type_manager = workflow_type_manager
+
     app.run(
         host=EnvSettings.flask_server_host(),
         port=EnvSettings.flask_server_port(),

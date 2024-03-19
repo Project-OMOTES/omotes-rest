@@ -1,12 +1,12 @@
 import logging.config
 
-from typing import List, Any
+from typing import Any
 import structlog
 from omotes_rest.settings import EnvSettings
 from structlog.threadlocal import merge_threadlocal
 
 timestamper = structlog.processors.TimeStamper(fmt="iso")
-shared_processors: List[Any] = [
+shared_processors: list[Any] = [
     structlog.stdlib.add_logger_name,
     structlog.stdlib.add_log_level,
     structlog.stdlib.PositionalArgumentsFormatter(),
@@ -54,7 +54,8 @@ logging.config.dictConfig(
 
 
 structlog.configure(
-    processors=[merge_threadlocal] + shared_processors + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
+    processors=[merge_threadlocal] + shared_processors +
+               [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
     logger_factory=structlog.stdlib.LoggerFactory(),
     cache_logger_on_first_use=True,
 )

@@ -15,7 +15,7 @@ services:
 
   omotes-rest:
 #    build: .
-    image: ghcr.io/project-omotes/omotes_rest:0.0.1
+    image: ghcr.io/project-omotes/omotes_rest:0.0.2
     networks:
       - computation-engine_omotes
     ports:

@@ -1,8 +1,8 @@
-"""initial commit
+"""initial commit2
 
-Revision ID: 0b2b6ee9274d
+Revision ID: 0a36c33edc13
 Revises: 
-Create Date: 2024-03-18 10:20:54.447282
+Create Date: 2024-03-19 08:33:06.697044
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0b2b6ee9274d'
+revision: str = '0a36c33edc13'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,8 +23,8 @@ def upgrade() -> None:
     op.create_table('job_rest',
     sa.Column('job_id', sa.UUID(), nullable=False),
     sa.Column('job_name', sa.String(), nullable=False),
-    sa.Column('work_flow_name', sa.Enum('GROW_OPTIMIZER', 'GROW_SIMULATOR', 'GROW_OPTIMIZER_NO_HEAT_LOSSES', 'GROW_OPTIMIZER_NO_HEAT_LOSSES_DISCOUNTED_CAPEX', 'SIMULATOR', name='workflowname'), nullable=False),
-    sa.Column('status', sa.Enum('REGISTERED', 'RUNNING', 'SUCCEEDED', 'CANCELLED', 'TIMEOUT', 'ERROR', name='jobreststatus'), nullable=False),
+    sa.Column('workflow_type', sa.String(), nullable=True),
+    sa.Column('status', sa.Enum('REGISTERED', 'ENQUEUED', 'RUNNING', 'SUCCEEDED', 'CANCELLED', 'TIMEOUT', 'ERROR', name='jobreststatus'), nullable=False),
     sa.Column('progress_fraction', sa.Float(), nullable=False),
     sa.Column('progress_message', sa.String(), nullable=False),
     sa.Column('registered_at', sa.DateTime(timezone=True), nullable=False),
@@ -34,7 +34,7 @@ def upgrade() -> None:
     sa.Column('timeout_after_s', sa.Integer(), nullable=True),
     sa.Column('user_name', sa.String(), nullable=False),
     sa.Column('project_name', sa.String(), nullable=False),
-    sa.Column('input_params_dict_str', sa.String(), nullable=True),
+    sa.Column('input_params_dict', sa.JSON(), nullable=True),
     sa.Column('input_esdl', sa.String(), nullable=False),
     sa.Column('output_esdl', sa.String(), nullable=True),
     sa.Column('logs', sa.String(), nullable=True),

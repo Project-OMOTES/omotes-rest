@@ -10,11 +10,11 @@ RUN pip install --upgrade pip
 COPY requirements.txt /code/
 
 WORKDIR /code
-# To avoid warning from flask dotenv.
-RUN touch .env
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /code
+# To avoid warning from flask dotenv.
+RUN touch .env
 
 RUN pip install -e .
 

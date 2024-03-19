@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 
 class PostgreSQLConfig:
@@ -8,8 +7,8 @@ class PostgreSQLConfig:
     host: str
     port: int
     database: str
-    username: Optional[str]
-    password: Optional[str]
+    username: str | None
+    password: str | None
 
     def __init__(self, prefix: str = ""):
         """Create the PostgreSQL configuration and retrieve values from env vars.
