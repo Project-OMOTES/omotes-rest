@@ -22,7 +22,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-# sys.path.append('../src')
+sys.path.append('../src')
 if importlib.util.find_spec("omotes_rest") is not None:
     print("Setting omotes_rest db models for autogeneration")
     from omotes_rest.db_models.job_rest import Base

@@ -119,7 +119,8 @@ class RestInterface:
         job = self.omotes_if.submit_job(
             esdl=base64.b64decode(job_input.input_esdl).decode(),
             params_dict=job_input.input_params_dict,
-            workflow_type=self.workflow_type_manager.get_workflow_by_name(job_input.workflow_type),
+            workflow_type=WorkflowType(workflow_type_name=job_input.workflow_type,
+                                       workflow_type_description_name="some descr"),
             job_timeout=timedelta(seconds=job_input.timeout_after_s),
             callback_on_finished=self.handle_on_job_finished,
             callback_on_progress_update=self.handle_on_job_progress_update,

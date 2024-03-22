@@ -1,7 +1,7 @@
 import json
 from time import strftime
 
-from flask import request, send_from_directory
+from flask import request, send_from_directory, current_app
 from werkzeug.exceptions import HTTPException
 
 from omotes_rest import create_app
@@ -75,7 +75,7 @@ def handle_500(e):
     return json.dumps({"message": "Internal Server Error"}), 500
 
 
-# TODO to be retrieved via de omotes_sdk
+# TODO to be retrieved via de omotes_sdk in the future
 workflow_type_manager = WorkflowTypeManager(
     possible_workflows=[
         WorkflowType(
@@ -103,15 +103,17 @@ workflow_type_manager = WorkflowTypeManager(
 )
 
 
-def on_starting(_):
+def post_fork(_, __):
     """
-    Called just before the gunicorn master process is initialized.
+    Called just after a worker has been forked.
     """
-
     with app.app_context():
-        app.rest_if = RestInterface(workflow_type_manager=workflow_type_manager)
+        """current_app is only within the app context"""
+
+        current_app.rest_if = RestInterface(workflow_type_manager)
         """Interface for this Omotes Rest service."""
-        app.rest_if.start()
+
+        current_app.rest_if.start()
 
 
 def main() -> None:
@@ -119,6 +121,7 @@ def main() -> None:
 
     Waits indefinitely until the omotes rest service stops.
     """
+
     app.run(
         host=EnvSettings.flask_server_host(),
         port=EnvSettings.flask_server_port(),

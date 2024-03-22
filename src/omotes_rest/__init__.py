@@ -8,6 +8,8 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from dotenv import load_dotenv
 
+from omotes_rest.rest_interface import RestInterface
+
 load_dotenv(verbose=True)
 
 import os  # noqa: E402
