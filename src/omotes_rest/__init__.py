@@ -23,7 +23,8 @@ env = DotEnv()
 
 
 def create_app(object_name):
-    """
+    """Create Flask app.
+
     An flask application factory, as explained here:
     http://flask.pocoo.org/docs/patterns/appfactories/
 

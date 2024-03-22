@@ -9,8 +9,8 @@ from marshmallow_dataclass import add_schema
 
 
 class JobRestStatus(Enum):
-    """Possible job status.
-    """
+    """ Possible job status. """
+
     REGISTERED = "registered"
     """Job is registered but not yet submitted to Celery."""
     ENQUEUED = "enqueued"
@@ -30,9 +30,8 @@ class JobRestStatus(Enum):
 @add_schema
 @dataclass
 class JobInput:
-    """
-    Input needed to start a new job.
-    """
+    """ Input needed to start a new job. """
+
     job_name: str = "job name"
     workflow_type: str = "grow_optimizer"
     user_name: str = "user name"
@@ -45,9 +44,8 @@ class JobInput:
 @add_schema
 @dataclass
 class JobStatusResponse:
-    """
-    Response with job status.
-    """
+    """ Response with job status. """
+
     job_id: uuid.UUID
     status: JobRestStatus
 
@@ -55,9 +53,8 @@ class JobStatusResponse:
 @add_schema
 @dataclass
 class JobResultResponse:
-    """
-    Response with job result.
-    """
+    """ Response with job result. """
+
     job_id: uuid.UUID
     output_esdl: str | None
 
@@ -65,9 +62,8 @@ class JobResultResponse:
 @add_schema
 @dataclass
 class JobDeleteResponse:
-    """
-    Response for job deletion.
-    """
+    """ Response for job deletion. """
+
     job_id: uuid.UUID
     deleted: bool
 
@@ -75,9 +71,8 @@ class JobDeleteResponse:
 @add_schema
 @dataclass
 class JobCancelResponse:
-    """
-    Response for job cancellation.
-    """
+    """ Response for job cancellation. """
+
     job_id: uuid.UUID
     cancelled: bool
 
@@ -85,9 +80,8 @@ class JobCancelResponse:
 @add_schema
 @dataclass
 class JobLogsResponse:
-    """
-    Response with job logs.
-    """
+    """ Response with job logs. """
+
     job_id: uuid.UUID
     logs: str | None
 
@@ -95,9 +89,8 @@ class JobLogsResponse:
 @add_schema
 @dataclass
 class JobResponse:
-    """
-    Response with all job data.
-    """
+    """ Response with all job data. """
+
     job_id: uuid.UUID
     job_name: str
     workflow_type: str
@@ -120,9 +113,8 @@ class JobResponse:
 @add_schema
 @dataclass
 class JobSummary:
-    """
-    Response with job summary used in job lists.
-    """
+    """ Response with job summary used in job lists. """
+
     job_id: uuid.UUID
     job_name: str
     workflow_type: str

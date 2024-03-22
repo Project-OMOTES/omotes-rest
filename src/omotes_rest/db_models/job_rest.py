@@ -13,8 +13,7 @@ Base = declarative_base()
 
 @dataclass
 class JobRest(Base):
-    """SQL table definition for an Omotes job.
-    """
+    """ SQL table definition for an Omotes job. """
 
     __tablename__ = "job_rest"
 

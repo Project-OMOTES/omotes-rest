@@ -7,25 +7,31 @@ load_dotenv(verbose=True)
 
 
 class EnvSettings:
+    """ Environment variables settings. """
+
     @staticmethod
     def env() -> str:
+        """ Env var. """
         return os.getenv("ENV", "dev")
 
     @staticmethod
     def flask_server_host() -> str:
+        """ Flask server host. """
         return "0.0.0.0"
 
     @staticmethod
     def flask_server_port() -> int:
+        """ Flask server port. """
         return 9200
 
     @staticmethod
     def is_production():
+        """ Check if production. """
         return EnvSettings.env() == "prod"
 
 
 class Config(object):
-    """Generic config for all environments."""
+    """ Generic config for all environments. """
 
     SECRET_KEY = secrets.token_urlsafe(16)
 
@@ -49,12 +55,16 @@ class Config(object):
 
 
 class ProdConfig(Config):
+    """ Production config. """
+
     ENV = "prod"
     DEBUG = False
     FLASK_DEBUG = False
 
 
 class DevConfig(Config):
+    """ Development config. """
+
     ENV = "dev"
     DEBUG = True
     FLASK_DEBUG = True
