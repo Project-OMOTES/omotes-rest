@@ -106,6 +106,8 @@ prompt-toolkit==3.0.43
     # via click-repl
 protobuf==4.25.3
     # via omotes-sdk-protocol
+psycopg2-binary==2.9.3
+    # via omotes-rest (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via celery
 python-dotenv==1.0.0

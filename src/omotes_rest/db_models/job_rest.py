@@ -32,11 +32,11 @@ class JobRest(Base):
     """Last received progress (fraction) of the job."""
     registered_at: datetime = db.Column(db.DateTime(timezone=True), nullable=False)
     """Time at which the job is registered."""
-    submitted_at: datetime | datetime = db.Column(db.DateTime(timezone=True))
+    submitted_at: datetime = db.Column(db.DateTime(timezone=True))
     """Time at which the job is submitted to Celery."""
-    running_at: datetime | datetime = db.Column(db.DateTime(timezone=True))
+    running_at: datetime = db.Column(db.DateTime(timezone=True))
     """Time at which a Celery worker has started the task for this job."""
-    stopped_at: datetime | datetime = db.Column(db.DateTime(timezone=True))
+    stopped_at: datetime = db.Column(db.DateTime(timezone=True))
     """Time at which the job stopped: due to finish, error or cancel."""
     timeout_after_s: int = db.Column(db.Integer)
     """Duration the job may run for before being cancelled due to timing out."""

@@ -22,7 +22,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-sys.path.append('../src')
+# sys.path.append('../src')
 if importlib.util.find_spec("omotes_rest") is not None:
     print("Setting omotes_rest db models for autogeneration")
     from omotes_rest.db_models.job_rest import Base
@@ -76,7 +76,7 @@ def run_migrations_online() -> None:
         password=os.getenv("POSTGRES_ROOT_PASSWORD"),
         host=os.getenv("POSTGRES_HOST", "localhost"),
         port=int(os.getenv("POSTGRES_DEV_PORT", "5432")),
-        database="omotes",
+        database="omotes_rest",
     )
 
     connectable = create_engine(

@@ -1,7 +1,7 @@
 version: "3.8"
 
 networks:
-  computation-engine_omotes:
+  omotes:
 
 volumes:
   db-data:
@@ -11,21 +11,21 @@ services:
     image: postgres:15.4
     restart: unless-stopped
     volumes:
-      - "db-data:/var/lib/postgresql/data/"
+      - "db-data:/var/lib/POSTGRES/data/"
     networks:
-      - computation-engine_omotes
+      - omotes
     environment:
-      PGDATA: /var/lib/postgresql/data
-      POSTGRES_DB: omotes
+      PGDATA: /var/lib/POSTGRES/data
+      POSTGRES_DB: ${POSTGRES_DATABASE}
       POSTGRES_USER: ${POSTGRES_ROOT_USER}
       POSTGRES_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_ROOT_USER}", "-d", "omotes" ]
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_ROOT_USER}", "-d", "${POSTGRES_DATABASE}" ]
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - "${POSTGRESQL_PORT}:5432"
+#    ports:
+#      - "${POSTGRES_PORT}:5432"
 
   # Skipped in 'docker-compose up', only used to develop database revisions.
   rest_postgres_db_dev:
@@ -39,7 +39,7 @@ services:
   rest_postgres_db_upgrade:
     build: postgres_db_upgrade
     networks:
-      - computation-engine_omotes
+      - omotes
     environment:
       POSTGRES_ROOT_USER: ${POSTGRES_ROOT_USER}
       POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}

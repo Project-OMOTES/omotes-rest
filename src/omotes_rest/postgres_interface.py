@@ -1,21 +1,19 @@
-import base64
 from uuid import uuid4
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Generator
 
-from omotes_sdk_protocol.job_pb2 import JobResult
 from sqlalchemy import select, update, delete, create_engine, orm
 from sqlalchemy.orm.strategy_options import load_only
 from sqlalchemy.orm import Session as SQLSession
 from sqlalchemy.engine import Engine, URL
-from omotes_rest.log import get_logger
 
+import logging
 from omotes_rest.apis.api_dataclasses import JobRestStatus, JobInput
 from omotes_rest.db_models.job_rest import JobRest
-from omotes_rest.config import PostgreSQLConfig
+from omotes_rest.config import POSTGRESConfig
 
-logger = get_logger("omotes_rest")
+logger = logging.getLogger("omotes_rest")
 
 session_factory = orm.sessionmaker()
 Session = orm.scoped_session(session_factory)
@@ -62,7 +60,7 @@ def session_scope(do_expunge: bool = False) -> Generator[SQLSession, None, None]
         Session.remove()
 
 
-def initialize_db(application_name: str, config: PostgreSQLConfig) -> Engine:
+def initialize_db(application_name: str, config: POSTGRESConfig) -> Engine:
     """Initialize the database connection by creating the engine.
 
     Also configure the default session maker.
@@ -111,12 +109,12 @@ class PostgresInterface:
     in this interface must set up a Session (scope) separately.
     """
 
-    db_config: PostgreSQLConfig
+    db_config: POSTGRESConfig
     """Configuration on how to connect to the database."""
     engine: Engine
     """Engine for starting connections to the database."""
 
-    def __init__(self, postgres_config: PostgreSQLConfig) -> None:
+    def __init__(self, postgres_config: POSTGRESConfig) -> None:
         """Create the PostgreSQL interface."""
         self.db_config = postgres_config
 
@@ -159,80 +157,83 @@ class PostgresInterface:
             session.add(new_job)
         logger.debug("Job %s is submitted as new job in database", job_id)
 
-    def set_job_status(self, job_id: uuid4, new_status: int, result: JobResult = None) -> None:
-        """Set the status of the job to 'SUBMITTED'.
+    def set_job_registered(self, job_id: uuid4) -> None:
+        """Set the status of the job to 'REGISTERED'.
 
-        :param job_id: Job to set the status to 'SUBMITTED'.
-        :param new_status: new status 'int' identifier from protobuf message.
-        :param result: optional result containing the result type, logs and output esdl.
+        :param job_id: Job id.
+        """
+        logger.debug("For job '%s' received new status REGISTERED")
+
+        with session_scope() as session:
+            stmnt = (
+                update(JobRest)
+                .where(JobRest.job_id == job_id)
+                .values(
+                    status=JobRestStatus.REGISTERED, registered_at=datetime.now()
+                )
+            )
+            session.execute(stmnt)
+
+    def set_job_enqueued(self, job_id: uuid4) -> None:
+        """Set the status of the job to 'ENQUEUED'.
+
+        :param job_id: Job id.
+        """
+        logger.debug("For job '%s' received new status ENQUEUED")
+
+        with session_scope() as session:
+            stmnt = (
+                update(JobRest)
+                .where(JobRest.job_id == job_id)
+                .values(
+                    status=JobRestStatus.ENQUEUED, submitted_at=datetime.now()
+                )
+            )
+            session.execute(stmnt)
+
+    def set_job_running(self, job_id: uuid4) -> None:
+        """Set the status of the job to 'RUNNING'.
+
+        :param job_id: Job id.
+        """
+        logger.debug("For job '%s' received new status RUNNING")
+
+        with session_scope() as session:
+            stmnt = (
+                update(JobRest)
+                .where(JobRest.job_id == job_id)
+                .values(
+                    status=JobRestStatus.RUNNING, running_at=datetime.now()
+                )
+            )
+            session.execute(stmnt)
+
+    def set_job_stopped(self, job_id: uuid4, new_status: JobRestStatus, logs: str = None,
+                        output_esdl: str = None) -> None:
+        """Set the job to stopped with supplied status.
+
+        :param job_id: Job id.
+        :param new_status: JobRestStatus.
+        :param logs: optional string containing the job logs.
+        :param output_esdl: optional string containing the job output esdl.
         """
         logger.debug("For job '%s' received new status '%s'", job_id, new_status)
 
         with session_scope() as session:
-            if new_status == 0:  # REGISTERED
-                stmnt = (
-                    update(JobRest)
-                    .where(JobRest.job_id == job_id)
-                    .values(
-                        status=JobRestStatus.REGISTERED, registered_at=datetime.now()
-                    )
+            stmnt = (
+                update(JobRest)
+                .where(JobRest.job_id == job_id)
+                .values(
+                    status=new_status, stopped_at=datetime.now(), logs=logs, output_esdl=output_esdl
                 )
-            elif new_status == 1:  # ENQUEUED
-                stmnt = (
-                    update(JobRest)
-                    .where(JobRest.job_id == job_id)
-                    .values(
-                        status=JobRestStatus.ENQUEUED, submitted_at=datetime.now()
-                    )
-                )
-            elif new_status == 2:  # RUNNING
-                stmnt = (
-                    update(JobRest)
-                    .where(JobRest.job_id == job_id)
-                    .values(
-                        status=JobRestStatus.RUNNING, running_at=datetime.now()
-                    )
-                )
-            elif new_status == 3 or new_status == 4:  # FINISHED or CANCELLED
-                if result is None:  # Should this happen?
-                    final_status = JobRestStatus.ERROR
-                elif result.result_type == 0:  # SUCCEEDED
-                    final_status = JobRestStatus.SUCCEEDED
-                elif result.result_type == 1:  # TIMEOUT
-                    final_status = JobRestStatus.TIMEOUT
-                elif result.result_type == 2:  # ERROR
-                    final_status = JobRestStatus.ERROR
-                elif result.result_type == 3:  # CANCELLED
-                    final_status = JobRestStatus.CANCELLED
-
-                if result:
-                    stmnt = (
-                        update(JobRest)
-                        .where(JobRest.job_id == job_id)
-                        .values(
-                            status=final_status, stopped_at=datetime.now(), logs=result.logs,
-                            output_esdl=base64.b64encode(result.output_esdl.encode()).decode()
-                        )
-                    )
-                else:
-                    stmnt = (
-                        update(JobRest)
-                        .where(JobRest.job_id == job_id)
-                        .values(
-                            status=final_status, stopped_at=datetime.now()
-                        )
-                    )
+            )
             session.execute(stmnt)
-
-        if result:
-            if new_status == 3 and result.result_type == 0:
-                self.set_job_progress(job_id, 1, "Job finished successfully.")
 
     def set_job_progress(self, job_id: uuid4, progress_fraction: float,
                          progress_message: str) -> None:
         """Set the status of the job to RUNNING.
 
-        :param job_id: Job to set the status to RUNNING.
+        :param job_id: Job id.
         :param progress_fraction: new progress fraction.
         :param progress_message: new progress message.
         """
@@ -251,7 +252,7 @@ class PostgresInterface:
     def get_job_status(self, job_id: uuid4) -> JobRestStatus | None:
         """Retrieve the current job status.
 
-        :param job_id: Job to retrieve the status for.
+        :param job_id: Job id.
         :return: Current job status.
         """
         logger.debug("Retrieving job status for job with id '%s'", job_id)
@@ -263,7 +264,7 @@ class PostgresInterface:
     def get_job(self, job_id: uuid4) -> JobRest | None:
         """Retrieve the job info from the database.
 
-        :param job_id: Job to retrieve the job information for.
+        :param job_id: Job id.
         :return: Job if it is available in the database.
         """
         logger.debug("Retrieving job data for job with id '%s'", job_id)
@@ -275,7 +276,7 @@ class PostgresInterface:
     def delete_job(self, job_id: uuid4) -> bool:
         """Remove the job from the database.
 
-        :param job_id: Job to remove from the database.
+        :param job_id: Job id.
         :return: True if the job was removed or False if the job was not in the database.
         """
         logger.debug("Deleting job with id '%s'", job_id)
@@ -292,6 +293,11 @@ class PostgresInterface:
         return job_deleted
 
     def get_jobs(self, job_ids: list[uuid4] | None = None) -> list[JobRest]:
+        """Retrieve a list of the jobs.
+
+        :param job_ids: Optional list of uuid's to select specific jobs, default is all jobs.
+        :return: List of jobs.
+        """
         with session_scope(do_expunge=True) as session:
             stmnt = SELECT_JOB_SUMMARY_STMT
             if job_ids:
@@ -306,7 +312,12 @@ class PostgresInterface:
             jobs = session.scalars(stmnt).all()
         return jobs
 
-    def get_job_output_esdl(self, job_id: uuid4) -> str:
+    def get_job_output_esdl(self, job_id: uuid4) -> str | None:
+        """Retrieve the output ESDL of a job.
+
+        :param job_id: Job id.
+        :return: Output ESDL as a base64 string.
+        """
         logger.debug("Retrieving job output esdl for job with id '%s'", job_id)
         with session_scope() as session:
             stmnt = select(JobRest.output_esdl).where(JobRest.job_id == job_id)
@@ -314,6 +325,11 @@ class PostgresInterface:
         return job_output_esdl
 
     def get_job_logs(self, job_id: uuid4) -> str:
+        """Retrieve the logs of a job.
+
+        :param job_id: Job id.
+        :return: Job logs as a string.
+        """
         logger.debug("Retrieving job log for job with id '%s'", job_id)
         with session_scope() as session:
             stmnt = select(JobRest.logs).where(JobRest.job_id == job_id)
@@ -321,6 +337,11 @@ class PostgresInterface:
         return job_logs
 
     def get_jobs_from_user(self, user_name: str) -> list[JobRest]:
+        """Retrieve a list of the jobs from a specific user.
+
+        :param user_name: Name of the user.
+        :return: List of jobs.
+        """
         logger.debug(f"Retrieving job data for jobs from user '{user_name}'")
         with session_scope(do_expunge=True) as session:
             stmnt = SELECT_JOB_SUMMARY_STMT.where(JobRest.user_name == user_name)
@@ -328,6 +349,11 @@ class PostgresInterface:
         return jobs
 
     def get_jobs_from_project(self, project_name: str) -> list[JobRest]:
+        """Retrieve a list of the jobs from a specific project.
+
+        :param project_name: Name of the project.
+        :return: List of jobs.
+        """
         logger.debug(f"Retrieving job data for jobs from project '{project_name}'")
         with session_scope(do_expunge=True) as session:
             stmnt = SELECT_JOB_SUMMARY_STMT.where(JobRest.project_name == project_name)
