@@ -30,7 +30,7 @@ def before_request():
 
 @app.after_request
 def after_request(response):
-    """ Log after request. """
+    """Log after request."""
     timestamp = strftime("[%Y-%b-%d %H:%M]")
     logger.debug(
         f"Request, timestamp '{timestamp}', remote_addr '{request.remote_addr}',"

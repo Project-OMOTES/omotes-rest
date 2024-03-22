@@ -24,7 +24,6 @@ env = DotEnv()
 
 def create_app(object_name):
     """Create Flask app.
-
     An flask application factory, as explained here:
     http://flask.pocoo.org/docs/patterns/appfactories/
 
@@ -32,7 +31,6 @@ def create_app(object_name):
         object_name: the python path of the config object,
                      e.g. influxdbgraphs.api.settings.ProdConfig
     """
-
     logger = logging.getLogger("omotes_rest")
     logger.info("Setting up app.")
 
