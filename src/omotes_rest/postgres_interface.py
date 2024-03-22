@@ -307,7 +307,7 @@ class PostgresInterface:
                 )
                 stmnt = stmnt.where(JobRest.job_id.in_(job_ids))
             else:
-                logger.debug(f"Retrieving job data for all jobs")
+                logger.debug("Retrieving job data for all jobs")
 
             jobs = session.scalars(stmnt).all()
         return jobs

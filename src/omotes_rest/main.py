@@ -19,7 +19,7 @@ app = create_app("omotes_rest.settings.%sConfig" % EnvSettings.env().capitalize(
 
 @app.before_request
 def before_request():
-    """ Log before request. """
+    """Log before request."""
     timestamp = strftime("[%Y-%b-%d %H:%M]")
     logger.debug(
         f"Request, timestamp '{timestamp}', remote_addr '{request.remote_addr}',"
@@ -41,7 +41,7 @@ def after_request(response):
 
 @app.route("/<path:path>")
 def serve_static(path):
-    """ Serve static. """
+    """Serve static."""
     return send_from_directory("static", path)
 
 
@@ -62,7 +62,7 @@ def handle_exception(e):
 
 @app.errorhandler(Exception)
 def handle_500(e):
-    """ Handle exceptions. """
+    """Handle exceptions."""
     logger.exception(f"Unhandled exception occurred {str(e)}")
     return json.dumps({"message": "Internal Server Error"}), 500
 
@@ -96,7 +96,7 @@ workflow_type_manager = WorkflowTypeManager(
 
 
 def post_fork(_, __):
-    """ Called just after a worker has been forked. """
+    """Called just after a worker has been forked."""
     with app.app_context():
         """current_app is only within the app context"""
 
