@@ -16,7 +16,7 @@ services:
         service: rest_postgres_db
 
   omotes-rest:
-    build: .
+#    build: .
     image: ghcr.io/project-omotes/omotes_rest:0.0.3
     networks:
       - omotes
