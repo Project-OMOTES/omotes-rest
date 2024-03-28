@@ -130,14 +130,16 @@ class PostgresInterface:
     def put_new_job(
             self,
             job_id: uuid4,
-            job_input: JobInput
+            job_input: JobInput,
+            esdl_input: str,
     ) -> None:
         """Insert a new job into the database.
 
         Note: Assumption is that the job_id is unique and has not yet been added to the database.
 
         :param job_id: Unique identifier of the job.
-        :param job_input: Received input for the job
+        :param job_input: Received input for the job.
+        :param job_input: Received input ESDL for the job.
         """
         with session_scope(do_expunge=False) as session:
             new_job = JobRest(
@@ -152,7 +154,7 @@ class PostgresInterface:
                 user_name=job_input.user_name,
                 project_name=job_input.project_name,
                 input_params_dict=job_input.input_params_dict,
-                input_esdl=job_input.input_esdl
+                input_esdl=esdl_input
             )
             session.add(new_job)
         logger.debug("Job %s is submitted as new job in database", job_id)

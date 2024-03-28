@@ -116,8 +116,12 @@ class RestInterface:
         :param job_input: JobInput dataclass with job input.
         :return: JobStatusResponse.
         """
+        esdlstr_bytes = job_input.input_esdl.encode('utf-8')
+        esdlstr_base64_bytes = base64.b64decode(esdlstr_bytes)
+        esdl_str = esdlstr_base64_bytes.decode('utf-8')
+        print(f"ESDL STR: {esdl_str}")
         job = self.omotes_if.submit_job(
-            esdl=base64.b64decode(job_input.input_esdl).decode(),
+            esdl=esdl_str,
             params_dict=job_input.input_params_dict,
             workflow_type=WorkflowType(workflow_type_name=job_input.workflow_type,
                                        workflow_type_description_name="some descr"),
@@ -130,6 +134,7 @@ class RestInterface:
         self.postgres_if.put_new_job(
             job_id=job.id,
             job_input=job_input,
+            esdl_input=esdl_str,
         )
         return JobStatusResponse(job_id=job.id, status=JobRestStatus.REGISTERED)
 
