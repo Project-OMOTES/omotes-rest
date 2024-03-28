@@ -37,8 +37,8 @@ class JobInput:
     user_name: str = "user name"
     input_esdl: str = "input ESDL base64string"
     project_name: str = "project name"
-    input_params_dict: dict[str, Any] = field(default_factory=dict)
-    timeout_after_s: int = 3600
+    input_params_dict: dict[str, Any] | None = field(default_factory=dict)
+    timeout_after_s: int | None = 3600
 
 
 @add_schema
