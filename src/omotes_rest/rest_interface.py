@@ -119,7 +119,6 @@ class RestInterface:
         esdlstr_bytes = job_input.input_esdl.encode('utf-8')
         esdlstr_base64_bytes = base64.b64decode(esdlstr_bytes)
         esdl_str = esdlstr_base64_bytes.decode('utf-8')
-        print(f"ESDL STR: {esdl_str}")
         job = self.omotes_if.submit_job(
             esdl=esdl_str,
             params_dict=job_input.input_params_dict,
