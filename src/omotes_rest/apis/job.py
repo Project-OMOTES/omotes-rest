@@ -4,15 +4,25 @@ from flask import current_app
 from flask_smorest import Blueprint
 from flask.views import MethodView
 
-from omotes_rest.apis.api_dataclasses import JobInput, JobResponse, JobStatusResponse, \
-    JobResultResponse, JobLogsResponse, JobSummary, JobDeleteResponse, JobCancelResponse
+from omotes_rest.apis.api_dataclasses import (
+    JobInput,
+    JobResponse,
+    JobStatusResponse,
+    JobResultResponse,
+    JobLogsResponse,
+    JobSummary,
+    JobDeleteResponse,
+    JobCancelResponse,
+)
 import logging
 
 logger = logging.getLogger("omotes_rest")
 
 api = Blueprint(
-    "Job", "Job", url_prefix="/job",
-    description="Omotes jobs: start, check status and get overview and results"
+    "Job",
+    "Job",
+    url_prefix="/job",
+    description="Omotes jobs: start, check status and get overview and results",
 )
 
 
@@ -44,8 +54,7 @@ class JobFromIdAPI(MethodView):
     @api.response(200, JobDeleteResponse.Schema())
     def delete(self, job_id: str):
         """Delete job, and cancel if queued or running."""
-        return JobDeleteResponse(job_id=job_id,
-                                 deleted=current_app.rest_if.delete_job(job_id))
+        return JobDeleteResponse(job_id=job_id, deleted=current_app.rest_if.delete_job(job_id))
 
 
 @api.route("/<string:job_id>/cancel")
@@ -55,8 +64,7 @@ class JobCancelAPI(MethodView):
     @api.response(200, JobCancelResponse.Schema())
     def get(self, job_id: str):
         """Cancel job if queued or running."""
-        return JobCancelResponse(job_id=job_id,
-                                 cancelled=current_app.rest_if.cancel_job(job_id))
+        return JobCancelResponse(job_id=job_id, cancelled=current_app.rest_if.cancel_job(job_id))
 
 
 @api.route("/<string:job_id>/status")
@@ -66,8 +74,7 @@ class JobStatusAPI(MethodView):
     @api.response(200, JobStatusResponse.Schema())
     def get(self, job_id: str):
         """Return job status."""
-        return JobStatusResponse(job_id=job_id,
-                                 status=current_app.rest_if.get_job_status(job_id))
+        return JobStatusResponse(job_id=job_id, status=current_app.rest_if.get_job_status(job_id))
 
 
 @api.route("/<string:job_id>/result")
@@ -76,10 +83,11 @@ class JobResultAPI(MethodView):
 
     @api.response(200, JobResultResponse.Schema())
     def get(self, job_id: int):
-        """Return job result."""
+        """Return job result with output ESDL (can be None)"""
         output_esdl = current_app.rest_if.get_job_output_esdl(job_id)
-        b64_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
-        return JobResultResponse(job_id=job_id, output_esdl=b64_esdl)
+        if output_esdl:
+            output_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
+        return JobResultResponse(job_id=job_id, output_esdl=output_esdl)
 
 
 @api.route("/<string:job_id>/logs")
@@ -89,8 +97,10 @@ class JobLogsAPI(MethodView):
     @api.response(200, JobLogsResponse.Schema())
     def get(self, job_id: int):
         """Return job logs."""
-        return JobLogsResponse(job_id=job_id,
-                               logs=current_app.rest_if.get_job_logs(job_id))
+        logs = current_app.rest_if.get_job_logs(job_id)
+        if not logs:
+            logs = "No logs received for this job."
+        return JobLogsResponse(job_id=job_id, logs=logs)
 
 
 @api.route("/user/<string:user_name>")
