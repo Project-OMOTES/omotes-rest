@@ -83,7 +83,7 @@ class JobResultAPI(MethodView):
 
     @api.response(200, JobResultResponse.Schema())
     def get(self, job_id: int):
-        """Return job result with output ESDL (can be None)"""
+        """Return job result with output ESDL (can be None)."""
         output_esdl = current_app.rest_if.get_job_output_esdl(job_id)
         if output_esdl:
             output_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
