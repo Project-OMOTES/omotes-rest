@@ -25,7 +25,7 @@ class EnvSettings:
         return 9200
 
     @staticmethod
-    def is_production():
+    def is_production() -> bool:
         """Check if production."""
         return EnvSettings.env() == "prod"
 

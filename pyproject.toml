@@ -37,7 +37,6 @@ dependencies = [
     "python-dotenv ~= 1.0.0",
     "structlog ~= 23.1.0",
     "SQLAlchemy == 2.0.28",
-    "sqlalchemy-stubs == 0.4",
     "omotes-sdk-python ~= 0.0.12",
 ]
 
@@ -55,7 +54,8 @@ dev = [
     "build ~= 1.0.3",
     "setuptools-git-versioning < 2",
     "sqlalchemy[mypy]",
-    "types-protobuf ~= 4.24.0"
+    "types-protobuf ~= 4.24.0",
+    "types-Flask-Cors"
 ]
 
 [project.urls]
@@ -116,7 +116,7 @@ exclude = [
     'testmodel',
     'tryouts.py',
 ]
-plugins = ['sqlalchemy.ext.mypy.plugin']
+plugins = ['sqlalchemy.ext.mypy.plugin', "marshmallow_dataclass.mypy"]
 
 # mypy per-module options:
 [[tool.mypy.overrides]]
@@ -125,5 +125,5 @@ check_untyped_defs = true
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "celery.*"
+module = ["flask_smorest.*", "flask_dotenv.*", "gunicorn.*"]
 ignore_missing_imports = true

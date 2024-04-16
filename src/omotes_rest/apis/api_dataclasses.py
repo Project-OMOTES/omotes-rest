@@ -2,10 +2,10 @@ import uuid
 from dataclasses import field
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, ClassVar, Type
 
-from marshmallow_dataclass import dataclass
-from marshmallow_dataclass import add_schema
+from marshmallow import Schema
+from marshmallow_dataclass import add_schema, dataclass
 
 
 class JobRestStatus(Enum):
@@ -32,19 +32,23 @@ class JobRestStatus(Enum):
 class JobInput:
     """Input needed to start a new job."""
 
+    Schema: ClassVar[Type[Schema]] = Schema
+
     job_name: str = "job name"
     workflow_type: str = "grow_optimizer"
     user_name: str = "user name"
     input_esdl: str = "input ESDL base64string"
     project_name: str = "project name"
-    input_params_dict: dict[str, Any] | None = field(default_factory=dict)
-    timeout_after_s: int | None = 3600
+    input_params_dict: dict[str, Any] = field(default_factory=dict)
+    timeout_after_s: int = 3600
 
 
 @add_schema
 @dataclass
 class JobStatusResponse:
     """Response with job status."""
+
+    Schema: ClassVar[Type[Schema]] = Schema
 
     job_id: uuid.UUID
     status: JobRestStatus
@@ -55,6 +59,8 @@ class JobStatusResponse:
 class JobResultResponse:
     """Response with job result."""
 
+    Schema: ClassVar[Type[Schema]] = Schema
+
     job_id: uuid.UUID
     output_esdl: str | None
 
@@ -63,6 +69,8 @@ class JobResultResponse:
 @dataclass
 class JobDeleteResponse:
     """Response for job deletion."""
+
+    Schema: ClassVar[Type[Schema]] = Schema
 
     job_id: uuid.UUID
     deleted: bool
@@ -73,6 +81,8 @@ class JobDeleteResponse:
 class JobCancelResponse:
     """Response for job cancellation."""
 
+    Schema: ClassVar[Type[Schema]] = Schema
+
     job_id: uuid.UUID
     cancelled: bool
 
@@ -82,6 +92,8 @@ class JobCancelResponse:
 class JobLogsResponse:
     """Response with job logs."""
 
+    Schema: ClassVar[Type[Schema]] = Schema
+
     job_id: uuid.UUID
     logs: str | None
 
@@ -90,6 +102,8 @@ class JobLogsResponse:
 @dataclass
 class JobResponse:
     """Response with all job data."""
+
+    Schema: ClassVar[Type[Schema]] = Schema
 
     job_id: uuid.UUID
     job_name: str
@@ -114,6 +128,8 @@ class JobResponse:
 @dataclass
 class JobSummary:
     """Response with job summary used in job lists."""
+
+    Schema: ClassVar[Type[Schema]] = Schema
 
     job_id: uuid.UUID
     job_name: str

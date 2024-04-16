@@ -22,22 +22,22 @@ api = Api()
 env = DotEnv()
 
 
-def create_app(object_name):
+def create_app(object_name: str) -> Flask:
     """Create Flask app.
 
-    An flask application factory, as explained here:
+    A flask application factory, as explained here:
     http://flask.pocoo.org/docs/patterns/appfactories/
 
-    Arguments:
-        object_name: the python path of the config object,
-                     e.g. influxdbgraphs.api.settings.ProdConfig
+    :param object_name: the python path of the config object, e.g.
+        influxdbgraphs.api.settings.ProdConfig
+    :return: The initalised Flask app.
     """
     logger = logging.getLogger("omotes_rest")
     logger.info("Setting up app.")
 
     app = Flask(__name__)
     app.config.from_object(object_name)
-    app.wsgi_app = ProxyFix(app.wsgi_app)
+    app.wsgi_app = ProxyFix(app.wsgi_app)  # type: ignore[method-assign]
 
     env.init_app(app)
     api.init_app(app)

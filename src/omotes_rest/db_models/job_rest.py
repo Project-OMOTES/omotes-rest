@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import sqlalchemy as db
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -25,7 +26,7 @@ class JobRest(Base):
     """Name of the workflow this job runs."""
     status: JobRestStatus = db.Column(db.Enum(JobRestStatus), nullable=False)
     """Last received status of the job."""
-    progress_fraction: float = db.Column(db.Float, nullable=False)
+    progress_fraction: Mapped[float] = mapped_column(db.Float, nullable=False)
     """Last received progress (fraction) of the job."""
     progress_message: str = db.Column(db.String, nullable=False)
     """Last received progress (fraction) of the job."""
