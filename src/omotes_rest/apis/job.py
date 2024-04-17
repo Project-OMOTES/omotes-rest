@@ -80,8 +80,9 @@ class JobCancelAPI(MethodView):
     def get(self, job_id: str) -> JobCancelResponse:
         """Cancel job if queued or running."""
         job_uuid = uuid.UUID(job_id)
-        return JobCancelResponse(job_id=job_uuid,
-                                 cancelled=current_app.rest_if.cancel_job(job_uuid))
+        return JobCancelResponse(
+            job_id=job_uuid, cancelled=current_app.rest_if.cancel_job(job_uuid)
+        )
 
 
 @api.route("/<string:job_id>/status")
@@ -98,7 +99,7 @@ class JobStatusAPI(MethodView):
         if status:
             result = JobStatusResponse(job_id=job_uuid, status=status)
         else:
-            result = Response(status=404, response=f'Unknown job {job_id}.')
+            result = Response(status=404, response=f"Unknown job {job_id}.")
         return result
 
 

@@ -33,7 +33,8 @@ def before_request() -> None:
     logger.debug(
         f"Request, timestamp '{timestamp}', remote_addr '{request.remote_addr}',"
         f" method '{request.method}', scheme '{request.scheme}', full_path '{request.full_path},"
-        f" 'payload '{request.get_data()!r}', 'headers '{request.headers}'")
+        f" 'payload '{request.get_data()!r}', 'headers '{request.headers}'"
+    )
     # return response
 
 
@@ -44,7 +45,8 @@ def after_request(response: FlaskResponse) -> FlaskResponse:
     logger.debug(
         f"Request, timestamp '{timestamp}', remote_addr '{request.remote_addr}',"
         f" method '{request.method}', scheme '{request.scheme}', full_path '{request.full_path},"
-        f" 'response '{response.status}'")
+        f" 'response '{response.status}'"
+    )
     return response
 
 
@@ -66,19 +68,20 @@ def handle_exception(e: HTTPException) -> WerkzeugResponse:
         }
     )
     response.content_type = "application/json"
-    return WerkzeugResponse(response=data,
-                            status=response.status_code,
-                            headers=response.headers, mimetype=response.mimetype,
-                            content_type=response.content_type)
+    return WerkzeugResponse(
+        response=data,
+        status=response.status_code,
+        headers=response.headers,
+        mimetype=response.mimetype,
+        content_type=response.content_type,
+    )
 
 
 @app.errorhandler(Exception)
 def handle_500(e: Exception) -> tuple[str, int]:
     """Handle exceptions."""
     logger.exception(f"Unhandled exception occurred {str(e)}")
-    return json.dumps({
-        "message": "Internal Server Error"
-    }), 500
+    return json.dumps({"message": "Internal Server Error"}), 500
 
 
 def post_fork(_: Arbiter, __: SyncWorker) -> None:

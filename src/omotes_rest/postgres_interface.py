@@ -69,8 +69,11 @@ def initialize_db(application_name: str, config: POSTGRESConfig) -> Engine:
     :param config: Configuration on how to connect to the SQL database.
     """
     logger.info(
-        "Connecting to PostgresDB at %s:%s as user %s to db %s", config.host, config.port,
-        config.username, config.database
+        "Connecting to PostgresDB at %s:%s as user %s to db %s",
+        config.host,
+        config.port,
+        config.username,
+        config.database,
     )
 
     try:
@@ -128,10 +131,10 @@ class PostgresInterface:
             self.engine.dispose()
 
     def put_new_job(
-            self,
-            job_id: uuid.UUID,
-            job_input: JobInput,
-            esdl_input: str,
+        self,
+        job_id: uuid.UUID,
+        job_input: JobInput,
+        esdl_input: str,
     ) -> None:
         """Insert a new job into the database.
 
@@ -154,7 +157,7 @@ class PostgresInterface:
                 user_name=job_input.user_name,
                 project_name=job_input.project_name,
                 input_params_dict=job_input.input_params_dict,
-                input_esdl=esdl_input
+                input_esdl=esdl_input,
             )
             session.add(new_job)
         logger.debug("Job %s is submitted as new job in database", job_id)
@@ -170,9 +173,7 @@ class PostgresInterface:
             stmnt = (
                 update(JobRest)
                 .where(JobRest.job_id == job_id)
-                .values(
-                    status=JobRestStatus.REGISTERED, registered_at=datetime.now()
-                )
+                .values(status=JobRestStatus.REGISTERED, registered_at=datetime.now())
             )
             session.execute(stmnt)
 
@@ -187,9 +188,7 @@ class PostgresInterface:
             stmnt = (
                 update(JobRest)
                 .where(JobRest.job_id == job_id)
-                .values(
-                    status=JobRestStatus.ENQUEUED, submitted_at=datetime.now()
-                )
+                .values(status=JobRestStatus.ENQUEUED, submitted_at=datetime.now())
             )
             session.execute(stmnt)
 
@@ -204,14 +203,17 @@ class PostgresInterface:
             stmnt = (
                 update(JobRest)
                 .where(JobRest.job_id == job_id)
-                .values(
-                    status=JobRestStatus.RUNNING, running_at=datetime.now()
-                )
+                .values(status=JobRestStatus.RUNNING, running_at=datetime.now())
             )
             session.execute(stmnt)
 
-    def set_job_stopped(self, job_id: uuid.UUID, new_status: JobRestStatus, logs: str | None = None,
-                        output_esdl: str | None = None) -> None:
+    def set_job_stopped(
+        self,
+        job_id: uuid.UUID,
+        new_status: JobRestStatus,
+        logs: str | None = None,
+        output_esdl: str | None = None,
+    ) -> None:
         """Set the job to stopped with supplied status.
 
         :param job_id: Job id.
@@ -231,23 +233,26 @@ class PostgresInterface:
             )
             session.execute(stmnt)
 
-    def set_job_progress(self, job_id: uuid.UUID, progress_fraction: float,
-                         progress_message: str) -> None:
+    def set_job_progress(
+        self, job_id: uuid.UUID, progress_fraction: float, progress_message: str
+    ) -> None:
         """Set the status of the job to RUNNING.
 
         :param job_id: Job id.
         :param progress_fraction: new progress fraction.
         :param progress_message: new progress message.
         """
-        logger.debug("For job '%s' received a new progress '%s' with message '%s'",
-                     job_id, progress_fraction, progress_message)
+        logger.debug(
+            "For job '%s' received a new progress '%s' with message '%s'",
+            job_id,
+            progress_fraction,
+            progress_message,
+        )
         with session_scope() as session:
             stmnt = (
                 update(JobRest)
                 .where(JobRest.job_id == job_id)
-                .values(
-                    progress_fraction=progress_fraction, progress_message=progress_message
-                )
+                .values(progress_fraction=progress_fraction, progress_message=progress_message)
             )
             session.execute(stmnt)
 
