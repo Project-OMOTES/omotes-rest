@@ -10,13 +10,14 @@ from omotes_sdk.omotes_interface import (
     JobProgressUpdate,
     JobStatusUpdate,
 )
-from omotes_sdk.workflow_type import WorkflowType, WorkflowTypeManager
+from omotes_sdk.workflow_type import WorkflowTypeManager
 
 import logging
 from omotes_rest.postgres_interface import PostgresInterface
 from omotes_rest.config import POSTGRESConfig
 from omotes_rest.apis.api_dataclasses import JobInput, JobStatusResponse
 from omotes_rest.db_models.job_rest import JobRestStatus, JobRest
+from omotes_rest.workflows import FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME
 
 logger = logging.getLogger("omotes_rest")
 
@@ -34,9 +35,9 @@ class RestInterface:
     def __init__(self, workflow_type_manager: WorkflowTypeManager):
         """Create the omotes rest interface.
 
-        :param workflow_type_manager: All available workflow types.
+        :param workflow_type_manager: All available OMOTES workflow types.
         """
-        self.omotes_if = OmotesInterface(EnvRabbitMQConfig())
+        self.omotes_if = OmotesInterface(EnvRabbitMQConfig(), workflow_type_manager)
         self.postgres_if = PostgresInterface(POSTGRESConfig())
         self.workflow_type_manager = workflow_type_manager
 
@@ -122,8 +123,7 @@ class RestInterface:
         job = self.omotes_if.submit_job(
             esdl=esdl_str,
             params_dict=job_input.input_params_dict,
-            workflow_type=WorkflowType(workflow_type_name=job_input.workflow_type,
-                                       workflow_type_description_name="some descr"),
+            workflow_type=self.workflow_type_manager.get_workflow_by_name(FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_input.workflow_type]),
             job_timeout=timedelta(seconds=job_input.timeout_after_s),
             callback_on_finished=self.handle_on_job_finished,
             callback_on_progress_update=self.handle_on_job_progress_update,
@@ -163,10 +163,7 @@ class RestInterface:
         if job_in_db:
             job = Job(
                 id=job_id,
-                workflow_type=WorkflowType(
-                    workflow_type_name=job_in_db.workflow_type,
-                    workflow_type_description_name="some descr"
-                )
+                workflow_type=self.workflow_type_manager.get_workflow_by_name(FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_in_db.workflow_type])
             )
             self.omotes_if.cancel_job(job)
             result = True
