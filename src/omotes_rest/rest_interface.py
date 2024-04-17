@@ -163,13 +163,13 @@ class RestInterface:
         """
         job_in_db = self.get_job(job_id)
 
-        workflow_type = self.workflow_type_manager.get_workflow_by_name(
-            FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_in_db.workflow_type]
-        )
-        if not workflow_type:
-            raise RuntimeError(f"Unknown workflow type {job_in_db.workflow_type}")
-
         if job_in_db:
+            workflow_type = self.workflow_type_manager.get_workflow_by_name(
+                FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_in_db.workflow_type]
+            )
+            if not workflow_type:
+                raise RuntimeError(f"Unknown workflow type {job_in_db.workflow_type}")
+
             job = Job(id=job_id, workflow_type=workflow_type)
             self.omotes_if.cancel_job(job)
             result = True
