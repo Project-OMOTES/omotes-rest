@@ -37,7 +37,7 @@ dependencies = [
     "python-dotenv ~= 1.0.0",
     "structlog ~= 23.1.0",
     "SQLAlchemy == 2.0.28",
-    "omotes-sdk-python ~= 0.0.12",
+    "omotes-sdk-python ~= 0.0.14",
 ]
 
 [project.optional-dependencies]

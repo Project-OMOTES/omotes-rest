@@ -10,13 +10,14 @@ from omotes_sdk.omotes_interface import (
     JobProgressUpdate,
     JobStatusUpdate,
 )
-from omotes_sdk.workflow_type import WorkflowType, WorkflowTypeManager
+from omotes_sdk.workflow_type import WorkflowTypeManager
 
 import logging
 from omotes_rest.postgres_interface import PostgresInterface
 from omotes_rest.config import POSTGRESConfig
 from omotes_rest.apis.api_dataclasses import JobInput, JobStatusResponse
 from omotes_rest.db_models.job_rest import JobRestStatus, JobRest
+from omotes_rest.workflows import FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME
 
 logger = logging.getLogger("omotes_rest")
 
@@ -34,9 +35,9 @@ class RestInterface:
     def __init__(self, workflow_type_manager: WorkflowTypeManager):
         """Create the omotes rest interface.
 
-        :param workflow_type_manager: All available workflow types.
+        :param workflow_type_manager: All available OMOTES workflow types.
         """
-        self.omotes_if = OmotesInterface(EnvRabbitMQConfig())
+        self.omotes_if = OmotesInterface(EnvRabbitMQConfig(), workflow_type_manager)
         self.postgres_if = PostgresInterface(POSTGRESConfig())
         self.workflow_type_manager = workflow_type_manager
 
@@ -67,10 +68,7 @@ class RestInterface:
             raise NotImplementedError(f"Unknown result type '{result.result_type}'")
 
         self.postgres_if.set_job_stopped(
-            job_id=job.id,
-            new_status=final_status,
-            logs=result.logs,
-            output_esdl=result.output_esdl
+            job_id=job.id, new_status=final_status, logs=result.logs, output_esdl=result.output_esdl
         )
 
     def handle_on_job_status_update(self, job: Job, status_update: JobStatusUpdate) -> None:
@@ -116,19 +114,24 @@ class RestInterface:
         :param job_input: JobInput dataclass with job input.
         :return: JobStatusResponse.
         """
-        esdlstr_bytes = job_input.input_esdl.encode('utf-8')
+        workflow_type = self.workflow_type_manager.get_workflow_by_name(
+            FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_input.workflow_type]
+        )
+        if not workflow_type:
+            raise RuntimeError(f"Unknown workflow type {job_input.workflow_type}")
+
+        esdlstr_bytes = job_input.input_esdl.encode("utf-8")
         esdlstr_base64_bytes = base64.b64decode(esdlstr_bytes)
-        esdl_str = esdlstr_base64_bytes.decode('utf-8')
+        esdl_str = esdlstr_base64_bytes.decode("utf-8")
         job = self.omotes_if.submit_job(
             esdl=esdl_str,
             params_dict=job_input.input_params_dict,
-            workflow_type=WorkflowType(workflow_type_name=job_input.workflow_type,
-                                       workflow_type_description_name="some descr"),
+            workflow_type=workflow_type,
             job_timeout=timedelta(seconds=job_input.timeout_after_s),
             callback_on_finished=self.handle_on_job_finished,
             callback_on_progress_update=self.handle_on_job_progress_update,
             callback_on_status_update=self.handle_on_job_status_update,
-            auto_disconnect_on_result=True
+            auto_disconnect_on_result=True,
         )
         self.postgres_if.put_new_job(
             job_id=job.id,
@@ -161,13 +164,13 @@ class RestInterface:
         job_in_db = self.get_job(job_id)
 
         if job_in_db:
-            job = Job(
-                id=job_id,
-                workflow_type=WorkflowType(
-                    workflow_type_name=job_in_db.workflow_type,
-                    workflow_type_description_name="some descr"
-                )
+            workflow_type = self.workflow_type_manager.get_workflow_by_name(
+                FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_in_db.workflow_type]
             )
+            if not workflow_type:
+                raise RuntimeError(f"Unknown workflow type {job_in_db.workflow_type}")
+
+            job = Job(id=job_id, workflow_type=workflow_type)
             self.omotes_if.cancel_job(job)
             result = True
         else:
