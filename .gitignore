@@ -22,3 +22,5 @@ build/
 
 venv/
 .venv/
+.coverage
+test-results.xml

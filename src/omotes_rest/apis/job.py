@@ -1,12 +1,12 @@
 import base64
+import logging
 import uuid
-from typing import cast
 
-from flask import current_app as flask_app, Flask, Response
+
+from flask import Response
 from flask_smorest import Blueprint
 from flask.views import MethodView
 
-from omotes_rest import RestInterface
 from omotes_rest.apis.api_dataclasses import (
     JobInput,
     JobResponse,
@@ -17,9 +17,9 @@ from omotes_rest.apis.api_dataclasses import (
     JobDeleteResponse,
     JobCancelResponse,
 )
-import logging
-
 from omotes_rest.db_models.job_rest import JobRest
+from omotes_rest.typed_app import current_app
+
 
 logger = logging.getLogger("omotes_rest")
 
@@ -29,15 +29,6 @@ api = Blueprint(
     url_prefix="/job",
     description="Omotes jobs: start, check status and get overview and results",
 )
-
-
-class OmotesRestApp(Flask):
-    """Type-complete description with extensions of the Flask app."""
-
-    rest_if: RestInterface
-
-
-current_app = cast(OmotesRestApp, flask_app)
 
 
 @api.route("/")
@@ -80,8 +71,9 @@ class JobCancelAPI(MethodView):
     def get(self, job_id: str) -> JobCancelResponse:
         """Cancel job if queued or running."""
         job_uuid = uuid.UUID(job_id)
-        return JobCancelResponse(job_id=job_uuid,
-                                 cancelled=current_app.rest_if.cancel_job(job_uuid))
+        return JobCancelResponse(
+            job_id=job_uuid, cancelled=current_app.rest_if.cancel_job(job_uuid)
+        )
 
 
 @api.route("/<string:job_id>/status")
@@ -98,7 +90,7 @@ class JobStatusAPI(MethodView):
         if status:
             result = JobStatusResponse(job_id=job_uuid, status=status)
         else:
-            result = Response(status=404, response=f'Unknown job {job_id}.')
+            result = Response(status=404, response=f"Unknown job {job_id}.")
         return result
 
 
