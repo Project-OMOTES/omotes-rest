@@ -1,4 +1,4 @@
-from uuid import uuid4
+import uuid
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Generator
@@ -129,7 +129,7 @@ class PostgresInterface:
 
     def put_new_job(
             self,
-            job_id: uuid4,
+            job_id: uuid.UUID,
             job_input: JobInput,
             esdl_input: str,
     ) -> None:
@@ -159,7 +159,7 @@ class PostgresInterface:
             session.add(new_job)
         logger.debug("Job %s is submitted as new job in database", job_id)
 
-    def set_job_registered(self, job_id: uuid4) -> None:
+    def set_job_registered(self, job_id: uuid.UUID) -> None:
         """Set the status of the job to 'REGISTERED'.
 
         :param job_id: Job id.
@@ -176,7 +176,7 @@ class PostgresInterface:
             )
             session.execute(stmnt)
 
-    def set_job_enqueued(self, job_id: uuid4) -> None:
+    def set_job_enqueued(self, job_id: uuid.UUID) -> None:
         """Set the status of the job to 'ENQUEUED'.
 
         :param job_id: Job id.
@@ -193,7 +193,7 @@ class PostgresInterface:
             )
             session.execute(stmnt)
 
-    def set_job_running(self, job_id: uuid4) -> None:
+    def set_job_running(self, job_id: uuid.UUID) -> None:
         """Set the status of the job to 'RUNNING'.
 
         :param job_id: Job id.
@@ -210,8 +210,8 @@ class PostgresInterface:
             )
             session.execute(stmnt)
 
-    def set_job_stopped(self, job_id: uuid4, new_status: JobRestStatus, logs: str = None,
-                        output_esdl: str = None) -> None:
+    def set_job_stopped(self, job_id: uuid.UUID, new_status: JobRestStatus, logs: str | None = None,
+                        output_esdl: str | None = None) -> None:
         """Set the job to stopped with supplied status.
 
         :param job_id: Job id.
@@ -231,7 +231,7 @@ class PostgresInterface:
             )
             session.execute(stmnt)
 
-    def set_job_progress(self, job_id: uuid4, progress_fraction: float,
+    def set_job_progress(self, job_id: uuid.UUID, progress_fraction: float,
                          progress_message: str) -> None:
         """Set the status of the job to RUNNING.
 
@@ -251,7 +251,7 @@ class PostgresInterface:
             )
             session.execute(stmnt)
 
-    def get_job_status(self, job_id: uuid4) -> JobRestStatus | None:
+    def get_job_status(self, job_id: uuid.UUID) -> JobRestStatus | None:
         """Retrieve the current job status.
 
         :param job_id: Job id.
@@ -263,7 +263,7 @@ class PostgresInterface:
             job_status = session.scalar(stmnt)
         return job_status
 
-    def get_job(self, job_id: uuid4) -> JobRest | None:
+    def get_job(self, job_id: uuid.UUID) -> JobRest | None:
         """Retrieve the job info from the database.
 
         :param job_id: Job id.
@@ -275,7 +275,7 @@ class PostgresInterface:
             job = session.scalar(stmnt)
         return job
 
-    def delete_job(self, job_id: uuid4) -> bool:
+    def delete_job(self, job_id: uuid.UUID) -> bool:
         """Remove the job from the database.
 
         :param job_id: Job id.
@@ -294,7 +294,7 @@ class PostgresInterface:
 
         return job_deleted
 
-    def get_jobs(self, job_ids: list[uuid4] | None = None) -> list[JobRest]:
+    def get_jobs(self, job_ids: list[uuid.UUID] | None = None) -> list[JobRest]:
         """Retrieve a list of the jobs.
 
         :param job_ids: Optional list of uuid's to select specific jobs, default is all jobs.
@@ -311,10 +311,10 @@ class PostgresInterface:
             else:
                 logger.debug("Retrieving job data for all jobs")
 
-            jobs = session.scalars(stmnt).all()
+            jobs = list(session.scalars(stmnt).all())
         return jobs
 
-    def get_job_output_esdl(self, job_id: uuid4) -> str | None:
+    def get_job_output_esdl(self, job_id: uuid.UUID) -> str | None:
         """Retrieve the output ESDL of a job.
 
         :param job_id: Job id.
@@ -323,10 +323,10 @@ class PostgresInterface:
         logger.debug("Retrieving job output esdl for job with id '%s'", job_id)
         with session_scope() as session:
             stmnt = select(JobRest.output_esdl).where(JobRest.job_id == job_id)
-            job_output_esdl: JobRest = session.scalar(stmnt)
+            job_output_esdl: str | None = session.scalar(stmnt)
         return job_output_esdl
 
-    def get_job_logs(self, job_id: uuid4) -> str:
+    def get_job_logs(self, job_id: uuid.UUID) -> str | None:
         """Retrieve the logs of a job.
 
         :param job_id: Job id.
@@ -335,7 +335,7 @@ class PostgresInterface:
         logger.debug("Retrieving job log for job with id '%s'", job_id)
         with session_scope() as session:
             stmnt = select(JobRest.logs).where(JobRest.job_id == job_id)
-            job_logs: JobRest = session.scalar(stmnt)
+            job_logs: str | None = session.scalar(stmnt)
         return job_logs
 
     def get_jobs_from_user(self, user_name: str) -> list[JobRest]:
@@ -347,7 +347,7 @@ class PostgresInterface:
         logger.debug(f"Retrieving job data for jobs from user '{user_name}'")
         with session_scope(do_expunge=True) as session:
             stmnt = SELECT_JOB_SUMMARY_STMT.where(JobRest.user_name == user_name)
-            jobs = session.scalars(stmnt).all()
+            jobs = list(session.scalars(stmnt).all())
         return jobs
 
     def get_jobs_from_project(self, project_name: str) -> list[JobRest]:
@@ -359,5 +359,5 @@ class PostgresInterface:
         logger.debug(f"Retrieving job data for jobs from project '{project_name}'")
         with session_scope(do_expunge=True) as session:
             stmnt = SELECT_JOB_SUMMARY_STMT.where(JobRest.project_name == project_name)
-            jobs = session.scalars(stmnt).all()
+            jobs = list(session.scalars(stmnt).all())
         return jobs

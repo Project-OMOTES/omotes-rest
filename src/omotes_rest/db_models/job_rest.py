@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import sqlalchemy as db
+from sqlalchemy.orm import Mapped
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -17,6 +18,8 @@ class JobRest(Base):
 
     __tablename__ = "job_rest"
 
+    progress_fraction: Mapped[float]
+    """Last received progress (fraction) of the job."""
     job_id: uuid.UUID = db.Column(UUID(as_uuid=True), primary_key=True)  # type: ignore [misc]
     """OMOTES identifier for the job."""
     job_name: str = db.Column(db.String, nullable=False)
@@ -25,8 +28,6 @@ class JobRest(Base):
     """Name of the workflow this job runs."""
     status: JobRestStatus = db.Column(db.Enum(JobRestStatus), nullable=False)
     """Last received status of the job."""
-    progress_fraction: float = db.Column(db.Float, nullable=False)
-    """Last received progress (fraction) of the job."""
     progress_message: str = db.Column(db.String, nullable=False)
     """Last received progress (fraction) of the job."""
     registered_at: datetime = db.Column(db.DateTime(timezone=True), nullable=False)

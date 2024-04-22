@@ -1,6 +1,6 @@
 import base64
+import uuid
 from datetime import timedelta
-from uuid import uuid4
 
 from omotes_sdk.omotes_interface import OmotesInterface
 from omotes_sdk.internal.common.config import EnvRabbitMQConfig
@@ -137,7 +137,7 @@ class RestInterface:
         )
         return JobStatusResponse(job_id=job.id, status=JobRestStatus.REGISTERED)
 
-    def get_job(self, job_id: uuid4) -> JobRest | None:
+    def get_job(self, job_id: uuid.UUID) -> JobRest | None:
         """Get job by id.
 
         :param job_id: Job id.
@@ -152,23 +152,29 @@ class RestInterface:
         """
         return self.postgres_if.get_jobs()
 
-    def cancel_job(self, job_id: uuid4) -> bool:
+    def cancel_job(self, job_id: uuid.UUID) -> bool:
         """Cancel job by id.
 
         :param job_id: Job id.
         :return: True if job found and cancelled.
         """
-        job = Job(
-            id=job_id,
-            workflow_type=WorkflowType(
-                workflow_type_name=self.get_job(job_id).workflow_type,
-                workflow_type_description_name="some descr"
-            )
-        )
-        self.omotes_if.cancel_job(job)
-        return True
+        job_in_db = self.get_job(job_id)
 
-    def delete_job(self, job_id: uuid4) -> bool:
+        if job_in_db:
+            job = Job(
+                id=job_id,
+                workflow_type=WorkflowType(
+                    workflow_type_name=job_in_db.workflow_type,
+                    workflow_type_description_name="some descr"
+                )
+            )
+            self.omotes_if.cancel_job(job)
+            result = True
+        else:
+            result = False
+        return result
+
+    def delete_job(self, job_id: uuid.UUID) -> bool:
         """Delete job by id.
 
         :param job_id: Job id.
@@ -177,7 +183,7 @@ class RestInterface:
         self.cancel_job(job_id)
         return self.postgres_if.delete_job(job_id)
 
-    def get_job_status(self, job_id: uuid4) -> JobRestStatus | None:
+    def get_job_status(self, job_id: uuid.UUID) -> JobRestStatus | None:
         """Get job status by id.
 
         :param job_id: Job id.
@@ -185,7 +191,7 @@ class RestInterface:
         """
         return self.postgres_if.get_job_status(job_id)
 
-    def get_job_output_esdl(self, job_id: uuid4) -> str | None:
+    def get_job_output_esdl(self, job_id: uuid.UUID) -> str | None:
         """Get job output ESDL by id.
 
         :param job_id: Job id.
@@ -193,7 +199,7 @@ class RestInterface:
         """
         return self.postgres_if.get_job_output_esdl(job_id)
 
-    def get_job_logs(self, job_id: uuid4) -> str | None:
+    def get_job_logs(self, job_id: uuid.UUID) -> str | None:
         """Get job logs by id.
 
         :param job_id: Job id.
