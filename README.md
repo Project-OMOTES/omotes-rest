@@ -1,8 +1,25 @@
-# ESDL MapEditor NWN Dispatcher
-This webservice allows the MapEditor to call the NWN SDK to submit new workflow jobs, see their status and retrieve the results.
+# Omotes REST service
+
+This webservice allows the MapEditor to call the Omotes SDK to submit new workflow jobs, see their status and retrieve
+the results.
 
 The webservice is based on TNOs Flask REST API Template.
 
+## Usage
+
+Copy `.env-template` to `.env` and fill with the appropriate values.  
+To set up the components (for windows run in `Git Bash`):
+```
+./scripts/setup.sh
+```
+To start the components:
+```
+./scripts/start.sh
+```
+To stop the components:
+```
+./scripts/stop.sh
+```
 
 # Flask REST API Template
 
@@ -17,7 +34,7 @@ The key dependencies are:
 
 ## Using the application
 
-The application can run in Docker or locally. There is a docker-compose.infra.yml file which is meant for infrastructure
+The application can run in Docker or locally. There is a docker-compose.dev.yml file which is meant for infrastructure
 services, which are not part of your application. The purpose is to run that always, and then you can either use the
 docker-compose.yml to start the API, or run it locally.
 

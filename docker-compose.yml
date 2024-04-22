@@ -1,10 +1,42 @@
 version: "3.8"
 
+networks:
+  omotes:
+    external: true
+  mapeditor-net:
+    external: true
+
+volumes:
+  db-data:
+
 services:
-  mapeditor-nwn-dispatcher:
-    build: .
-    image: mvrijlandt/mapeditor_nwn_dispatcher:0.0.2
+  rest_postgres_db:
+      extends:
+        file: docker-compose.dev.yml
+        service: rest_postgres_db
+
+  omotes-rest:
+#    build: .
+    image: ghcr.io/project-omotes/omotes_rest:0.0.8
+    networks:
+      - omotes
+      - mapeditor-net
     ports:
       - "9200:9200"
-    env_file:
-      - ".env"
+    environment:
+      RABBITMQ_HOSTNAME: rabbitmq-nwn
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_VIRTUALHOST: omotes
+
+      POSTGRES_HOST: rest_postgres_db
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: omotes_rest
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      LOG_LEVEL: info
+    depends_on:
+      rest_postgres_db:
+        condition: service_healthy

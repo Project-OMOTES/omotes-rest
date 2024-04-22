@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="TNO Mapeditor NWN Dispatcher",
+    name="Omotes REST",
     version="1.0",
-    packages=["tno"],
+    packages=["src"],
 )

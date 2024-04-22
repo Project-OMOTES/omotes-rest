@@ -13,7 +13,7 @@
 #      TNO
 import os
 
-from src.settings import heatnetwork_dispatcher_config
+from settings import heatnetwork_dispatcher_config
 
 EPS_WEB_HOST = os.getenv("EPS_WEB_HOST", "http://epsweb:3401")
 ESDL_AGGREGATOR_HOST = os.getenv("ESDL_AGGREGATOR_HOST", "http://esdl-aggregator:3490")
