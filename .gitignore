@@ -21,4 +21,6 @@ build/
 .~lock*
 
 venv/
-
+.venv/
+.coverage
+test-results.xml

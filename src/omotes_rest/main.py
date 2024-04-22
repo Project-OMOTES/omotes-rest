@@ -1,28 +1,26 @@
 import json
+import logging
 from os import PathLike
 from time import strftime
-from typing import cast
 
-from flask import request, send_from_directory, current_app as flask_app, Response as FlaskResponse
+from flask import request, send_from_directory, Response as FlaskResponse
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers.response import Response as WerkzeugResponse
 from gunicorn.arbiter import Arbiter
 from gunicorn.workers.sync import SyncWorker
 
 from omotes_rest import create_app
-from omotes_rest.apis.job import OmotesRestApp
 from omotes_rest.rest_interface import RestInterface
 from omotes_rest.settings import EnvSettings
 from omotes_rest.workflows import WORKFLOW_TYPE_MANAGER
-import logging
+from omotes_rest.typed_app import current_app
+
 
 """logger."""
 logger = logging.getLogger("omotes_rest")
 
 """Flask application."""
 app = create_app("omotes_rest.settings.%sConfig" % EnvSettings.env().capitalize())
-
-current_app = cast(OmotesRestApp, flask_app)
 
 
 @app.before_request
