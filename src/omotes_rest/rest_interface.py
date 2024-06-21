@@ -9,12 +9,13 @@ from omotes_sdk.omotes_interface import (
     JobResult,
     JobProgressUpdate,
     JobStatusUpdate,
+    AvailableWorkflows,
 )
 from omotes_sdk.workflow_type import WorkflowTypeManager
 
 import logging
 from omotes_rest.postgres_interface import PostgresInterface
-from omotes_rest.config import POSTGRESConfig
+from omotes_rest.config import PostgresConfig
 from omotes_rest.apis.api_dataclasses import JobInput, JobStatusResponse
 from omotes_rest.db_models.job_rest import JobRestStatus, JobRest
 from omotes_rest.workflows import FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME
@@ -32,14 +33,15 @@ class RestInterface:
     workflow_type_manager: WorkflowTypeManager
     """Interface to Omotes."""
 
-    def __init__(self, workflow_type_manager: WorkflowTypeManager):
-        """Create the omotes rest interface.
-
-        :param workflow_type_manager: All available OMOTES workflow types.
-        """
-        self.omotes_if = OmotesInterface(EnvRabbitMQConfig(), workflow_type_manager)
-        self.postgres_if = PostgresInterface(POSTGRESConfig())
-        self.workflow_type_manager = workflow_type_manager
+    def __init__(
+        self,
+    ) -> None:
+        """Create the omotes rest interface."""
+        self.omotes_if = OmotesInterface(
+            EnvRabbitMQConfig(),
+            callback_on_available_workflows_update=self.handle_on_available_workflows_update,
+        )
+        self.postgres_if = PostgresInterface(PostgresConfig())
 
     def start(self) -> None:
         """Start the omotes rest interface."""
@@ -49,6 +51,16 @@ class RestInterface:
     def stop(self) -> None:
         """Stop the omotes rest interface."""
         self.omotes_if.stop()
+
+    def handle_on_available_workflows_update(
+        self, available_workflows_pb: AvailableWorkflows
+    ) -> None:
+        """When the available workflows are updated.
+
+        :param available_workflows_pb: AvailableWorkflows protobuf message.
+        """
+        self.workflow_type_manager = WorkflowTypeManager.from_pb_message(available_workflows_pb)
+        logger.info("Updated the available workflows to: \n%s", self.workflow_type_manager)
 
     def handle_on_job_finished(self, job: Job, result: JobResult) -> None:
         """When a job is finished.
@@ -107,6 +119,13 @@ class RestInterface:
             progress_fraction=progress_update.progress,
             progress_message=progress_update.message,
         )
+
+    def get_available_workflows_dict(self) -> dict:
+        """Get the available workflows represented as dictionary.
+
+        :return: dictionary response.
+        """
+        return self.workflow_type_manager.to_dict()
 
     def submit_job(self, job_input: JobInput) -> JobStatusResponse:
         """When a job has a progress update.

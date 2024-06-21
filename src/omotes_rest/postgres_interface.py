@@ -11,7 +11,7 @@ from sqlalchemy.engine import Engine, URL
 import logging
 from omotes_rest.apis.api_dataclasses import JobRestStatus, JobInput
 from omotes_rest.db_models.job_rest import JobRest
-from omotes_rest.config import POSTGRESConfig
+from omotes_rest.config import PostgresConfig
 
 logger = logging.getLogger("omotes_rest")
 
@@ -60,7 +60,7 @@ def session_scope(do_expunge: bool = False) -> Generator[SQLSession, None, None]
         Session.remove()
 
 
-def initialize_db(application_name: str, config: POSTGRESConfig) -> Engine:
+def initialize_db(application_name: str, config: PostgresConfig) -> Engine:
     """Initialize the database connection by creating the engine.
 
     Also configure the default session maker.
@@ -112,12 +112,12 @@ class PostgresInterface:
     in this interface must set up a Session (scope) separately.
     """
 
-    db_config: POSTGRESConfig
+    db_config: PostgresConfig
     """Configuration on how to connect to the database."""
     engine: Engine
     """Engine for starting connections to the database."""
 
-    def __init__(self, postgres_config: POSTGRESConfig) -> None:
+    def __init__(self, postgres_config: PostgresConfig) -> None:
         """Create the PostgreSQL interface."""
         self.db_config = postgres_config
 
