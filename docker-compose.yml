@@ -17,7 +17,7 @@ services:
 
   omotes-rest:
 #    build: .
-    image: ghcr.io/project-omotes/omotes_rest:0.0.8
+    image: ghcr.io/project-omotes/omotes_rest:0.0.9
     networks:
       - omotes
       - mapeditor-net

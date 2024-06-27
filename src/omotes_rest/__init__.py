@@ -44,8 +44,10 @@ def create_app(object_name: str) -> Flask:
 
     # Register blueprints.
     from omotes_rest.apis.job import api as job_api
+    from omotes_rest.apis.workflow import api as workflow_api
 
     api.register_blueprint(job_api)
+    api.register_blueprint(workflow_api)
 
     CORS(app, resources={r"/*": {"origins": "*"}})
 

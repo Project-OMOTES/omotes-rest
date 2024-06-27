@@ -12,7 +12,6 @@ from gunicorn.workers.sync import SyncWorker
 from omotes_rest import create_app
 from omotes_rest.rest_interface import RestInterface
 from omotes_rest.settings import EnvSettings
-from omotes_rest.workflows import WORKFLOW_TYPE_MANAGER
 from omotes_rest.typed_app import current_app
 
 
@@ -87,7 +86,7 @@ def post_fork(_: Arbiter, __: SyncWorker) -> None:
     with app.app_context():
         """current_app is only within the app context"""
 
-        current_app.rest_if = RestInterface(WORKFLOW_TYPE_MANAGER)
+        current_app.rest_if = RestInterface()
         """Interface for this Omotes Rest service."""
 
         current_app.rest_if.start()

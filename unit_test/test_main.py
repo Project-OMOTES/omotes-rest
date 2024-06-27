@@ -1,5 +1,5 @@
 import unittest
-from omotes_rest.config import POSTGRESConfig
+from omotes_rest.config import PostgresConfig
 
 
 class MyTest(unittest.TestCase):
@@ -7,7 +7,7 @@ class MyTest(unittest.TestCase):
         # Arrange
 
         # Act
-        result = POSTGRESConfig()
+        result = PostgresConfig()
 
         # Assert
         self.assertIsNotNone(result)

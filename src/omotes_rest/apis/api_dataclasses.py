@@ -8,6 +8,18 @@ from marshmallow import Schema
 from marshmallow_dataclass import add_schema, dataclass
 
 
+@add_schema
+@dataclass
+class WorkflowResponse:
+    """Response with available workflows."""
+
+    Schema: ClassVar[Type[Schema]] = Schema
+
+    workflow_type_name: str
+    workflow_type_description_name: str
+    workflow_parameters: dict[str, Any] | None
+
+
 class JobRestStatus(Enum):
     """Possible job status."""
 
