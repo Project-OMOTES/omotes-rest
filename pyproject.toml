@@ -74,7 +74,7 @@ enabled = true
 
 [tool.pytest.ini_options]
 addopts = """--cov=omotes_rest --cov-report html --cov-report term-missing \
---cov-fail-under 2"""
+--cov-fail-under 40"""
 
 [tool.coverage.run]
 source = ["src"]
