@@ -4,4 +4,4 @@
 
 $DOCKER_COMPOSE -f ./docker-compose.dev.yml --profile=manual_dev --profile=manual_setup down
 $DOCKER_COMPOSE -f ./docker-compose.yml down
-$DOCKER_COMPOSE -f ./docker-compose.yml up --wait
+$DOCKER_COMPOSE -f ./docker-compose.yml -f ./docker-compose.dev.yml --profile=manual_dev up --wait --build

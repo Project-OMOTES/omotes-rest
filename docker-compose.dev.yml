@@ -7,6 +7,10 @@ volumes:
   db-data:
 
 services:
+  omotes-rest:
+      build:
+        context: ..
+        dockerfile: omotes-rest/dev.Dockerfile
   rest_postgres_db: &rest_postgres_db
     image: postgres:15.4
     restart: unless-stopped
