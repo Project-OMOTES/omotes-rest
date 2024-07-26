@@ -112,14 +112,14 @@ class RestInterface:
             progress_message=progress_update.message,
         )
 
-    def get_workflows_jsonforms_format(self) -> dict:
-        """Get the available workflows with jsonforms schemas per parameter.
+    def get_workflows_jsonforms_format(self) -> list:
+        """Get the available workflows with jsonforms schema for the non-ESDL parameters.
 
         :return: dictionary response.
         """
-        workflows_dict = dict()
+        workflows = []
         for _workflow in self.omotes_if.get_workflow_type_manager().get_all_workflows():
-            parameter_jsonforms_schemas = dict()
+            properties = dict()
             if _workflow.workflow_parameters:
                 for _parameter in _workflow.workflow_parameters:
                     jsonforms_schema: dict[
@@ -170,13 +170,16 @@ class RestInterface:
                         raise NotImplementedError(
                             f"Parameter type {type(_parameter)} not supported"
                         )
-                    parameter_jsonforms_schemas[_parameter.key_name] = jsonforms_schema
+                    properties[_parameter.key_name] = jsonforms_schema
 
-            workflows_dict[_workflow.workflow_type_name] = dict(
-                workflow_description=_workflow.workflow_type_description_name,
-                parameter_jsonforms_schemas=parameter_jsonforms_schemas,
+            workflows.append(
+                dict(
+                    id=_workflow.workflow_type_name,
+                    description=_workflow.workflow_type_description_name,
+                    schema=dict(type="object", properties=properties),
+                )
             )
-        return workflows_dict
+        return workflows
 
     def submit_job(self, job_input: JobInput) -> JobStatusResponse:
         """When a job has a progress update.
