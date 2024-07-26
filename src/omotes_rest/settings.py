@@ -29,6 +29,11 @@ class EnvSettings:
         """Check if production."""
         return EnvSettings.env() == "prod"
 
+    @staticmethod
+    def omotes_id() -> str:
+        """Env var."""
+        return os.getenv("OMOTES_ID", "omotes-rest")
+
 
 class Config(object):
     """Generic config for all environments."""

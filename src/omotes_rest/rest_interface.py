@@ -24,6 +24,7 @@ from omotes_rest.postgres_interface import PostgresInterface
 from omotes_rest.config import PostgresConfig
 from omotes_rest.apis.api_dataclasses import JobInput, JobStatusResponse
 from omotes_rest.db_models.job_rest import JobRestStatus, JobRest
+from omotes_rest.settings import EnvSettings
 from omotes_rest.workflows import FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME
 
 logger = logging.getLogger("omotes_rest")
@@ -41,7 +42,7 @@ class RestInterface:
         self,
     ) -> None:
         """Create the omotes rest interface."""
-        self.omotes_if = OmotesInterface(EnvRabbitMQConfig())
+        self.omotes_if = OmotesInterface(EnvRabbitMQConfig(), EnvSettings.omotes_id())
         self.postgres_if = PostgresInterface(PostgresConfig())
 
     def start(self) -> None:

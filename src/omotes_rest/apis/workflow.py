@@ -18,7 +18,7 @@ api = Blueprint(
 
 
 @api.route("/")
-class JobAPI(MethodView):
+class WorkflowAPI(MethodView):
     """Requests."""
 
     def get(self) -> Response:
