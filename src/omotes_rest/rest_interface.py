@@ -25,7 +25,6 @@ from omotes_rest.config import PostgresConfig
 from omotes_rest.apis.api_dataclasses import JobInput, JobStatusResponse
 from omotes_rest.db_models.job_rest import JobRestStatus, JobRest
 from omotes_rest.settings import EnvSettings
-from omotes_rest.workflows import FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME
 
 logger = logging.getLogger("omotes_rest")
 
@@ -71,8 +70,11 @@ class RestInterface:
         else:
             raise NotImplementedError(f"Unknown result type '{result.result_type}'")
 
+        output_esdl = None
+        if result.output_esdl:
+            output_esdl = base64.b64encode(bytes(result.output_esdl, "utf-8")).decode("utf-8")
         self.postgres_if.set_job_stopped(
-            job_id=job.id, new_status=final_status, logs=result.logs, output_esdl=result.output_esdl
+            job_id=job.id, new_status=final_status, logs=result.logs, output_esdl=output_esdl
         )
 
     def handle_on_job_status_update(self, job: Job, status_update: JobStatusUpdate) -> None:
@@ -120,6 +122,7 @@ class RestInterface:
         workflows = []
         for _workflow in self.omotes_if.get_workflow_type_manager().get_all_workflows():
             properties = dict()
+            required_props = []
             if _workflow.workflow_parameters:
                 for _parameter in _workflow.workflow_parameters:
                     jsonforms_schema: dict[
@@ -171,14 +174,23 @@ class RestInterface:
                             f"Parameter type {type(_parameter)} not supported"
                         )
                     properties[_parameter.key_name] = jsonforms_schema
+                    required_props.append(_parameter.key_name)
 
-            workflows.append(
-                dict(
-                    id=_workflow.workflow_type_name,
-                    description=_workflow.workflow_type_description_name,
-                    schema=dict(type="object", properties=properties),
+            if properties:
+                workflows.append(
+                    dict(
+                        id=_workflow.workflow_type_name,
+                        description=_workflow.workflow_type_description_name,
+                        schema=dict(type="object", properties=properties, required=required_props),
+                    )
                 )
-            )
+            else:
+                workflows.append(
+                    dict(
+                        id=_workflow.workflow_type_name,
+                        description=_workflow.workflow_type_description_name,
+                    )
+                )
         return workflows
 
     def submit_job(self, job_input: JobInput) -> JobStatusResponse:
@@ -188,7 +200,7 @@ class RestInterface:
         :return: JobStatusResponse.
         """
         workflow_type = self.omotes_if.get_workflow_type_manager().get_workflow_by_name(
-            FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_input.workflow_type]
+            job_input.workflow_type
         )
         if not workflow_type:
             raise RuntimeError(f"Unknown workflow type {job_input.workflow_type}")
@@ -209,7 +221,7 @@ class RestInterface:
         self.postgres_if.put_new_job(
             job_id=job.id,
             job_input=job_input,
-            esdl_input=esdl_str,
+            esdl_input=job_input.input_esdl,
         )
         return JobStatusResponse(job_id=job.id, status=JobRestStatus.REGISTERED)
 
@@ -238,7 +250,7 @@ class RestInterface:
 
         if job_in_db:
             workflow_type = self.omotes_if.get_workflow_type_manager().get_workflow_by_name(
-                FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_in_db.workflow_type]
+                job_in_db.workflow_type
             )
             if not workflow_type:
                 raise RuntimeError(f"Unknown workflow type {job_in_db.workflow_type}")
