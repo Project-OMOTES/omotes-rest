@@ -10,13 +10,7 @@ volumes:
   db-data:
 
 services:
-  rest_postgres_db:
-      extends:
-        file: docker-compose.dev.yml
-        service: rest_postgres_db
-
   omotes-rest:
-#    build: .
     image: ghcr.io/project-omotes/omotes_rest:0.0.9
     networks:
       - omotes
@@ -40,3 +34,37 @@ services:
     depends_on:
       rest_postgres_db:
         condition: service_healthy
+
+  rest_postgres_db:
+    image: postgres:15.4
+    restart: unless-stopped
+    volumes:
+      - "db-data:/var/lib/POSTGRES/data/"
+    networks:
+      - omotes
+    environment:
+      PGDATA: /var/lib/POSTGRES/data
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+      POSTGRES_USER: ${POSTGRES_ROOT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_ROOT_USER}", "-d", "${POSTGRES_DATABASE}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Skipped in 'docker-compose up', only used in 'setup.sh'
+  rest_postgres_db_upgrade:
+    build: postgres_db_upgrade
+    networks:
+      - omotes
+    environment:
+      POSTGRES_ROOT_USER: ${POSTGRES_ROOT_USER}
+      POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
+      POSTGRES_HOST: rest_postgres_db
+      POSTGRES_PORT: 5432
+    depends_on:
+      rest_postgres_db:
+        condition: service_healthy
+    profiles:
+      - manual_setup
