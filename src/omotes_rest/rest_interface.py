@@ -1,4 +1,3 @@
-import base64
 import uuid
 from datetime import timedelta, datetime
 from typing import Union
@@ -70,11 +69,8 @@ class RestInterface:
         else:
             raise NotImplementedError(f"Unknown result type '{result.result_type}'")
 
-        output_esdl = None
-        if result.output_esdl:
-            output_esdl = base64.b64encode(bytes(result.output_esdl, "utf-8")).decode("utf-8")
         self.postgres_if.set_job_stopped(
-            job_id=job.id, new_status=final_status, logs=result.logs, output_esdl=output_esdl
+            job_id=job.id, new_status=final_status, logs=result.logs, output_esdl=result.output_esdl
         )
 
     def handle_on_job_status_update(self, job: Job, status_update: JobStatusUpdate) -> None:
@@ -205,11 +201,8 @@ class RestInterface:
         if not workflow_type:
             raise RuntimeError(f"Unknown workflow type {job_input.workflow_type}")
 
-        esdlstr_bytes = job_input.input_esdl.encode("utf-8")
-        esdlstr_base64_bytes = base64.b64decode(esdlstr_bytes)
-        esdl_str = esdlstr_base64_bytes.decode("utf-8")
         job = self.omotes_if.submit_job(
-            esdl=esdl_str,
+            esdl=job_input.input_esdl,
             params_dict=job_input.input_params_dict,
             workflow_type=workflow_type,
             job_timeout=timedelta(seconds=job_input.timeout_after_s),
