@@ -8,6 +8,7 @@ volumes:
 
 services:
   omotes-rest:
+      image: omotes-rest-dev
       build:
         context: ..
         dockerfile: omotes-rest/dev.Dockerfile
