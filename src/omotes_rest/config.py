@@ -1,7 +1,7 @@
 import os
 
 
-class POSTGRESConfig:
+class PostgresConfig:
     """Retrieve POSTGRES configuration from environment variables."""
 
     host: str

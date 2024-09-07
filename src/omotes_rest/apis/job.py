@@ -1,4 +1,3 @@
-import base64
 import logging
 import uuid
 
@@ -103,8 +102,6 @@ class JobResultAPI(MethodView):
         """Return job result with output ESDL (can be None)."""
         job_uuid = uuid.UUID(job_id)
         output_esdl = current_app.rest_if.get_job_output_esdl(job_uuid)
-        if output_esdl:
-            output_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
         return JobResultResponse(job_id=job_uuid, output_esdl=output_esdl)
 
 

@@ -37,7 +37,7 @@ dependencies = [
     "python-dotenv ~= 1.0.0",
     "structlog ~= 23.1.0",
     "SQLAlchemy == 2.0.28",
-    "omotes-sdk-python ~= 0.0.14",
+    "omotes-sdk-python ~= 2.0.2",
 ]
 
 [project.optional-dependencies]
@@ -74,7 +74,7 @@ enabled = true
 
 [tool.pytest.ini_options]
 addopts = """--cov=omotes_rest --cov-report html --cov-report term-missing \
---cov-fail-under 2"""
+--cov-fail-under 40"""
 
 [tool.coverage.run]
 source = ["src"]

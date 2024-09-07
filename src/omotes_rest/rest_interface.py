@@ -1,6 +1,6 @@
-import base64
 import uuid
-from datetime import timedelta
+from datetime import timedelta, datetime
+from typing import Union
 
 from omotes_sdk.omotes_interface import OmotesInterface
 from omotes_sdk.internal.common.config import EnvRabbitMQConfig
@@ -10,14 +10,20 @@ from omotes_sdk.omotes_interface import (
     JobProgressUpdate,
     JobStatusUpdate,
 )
-from omotes_sdk.workflow_type import WorkflowTypeManager
+from omotes_sdk.workflow_type import (
+    StringParameter,
+    BooleanParameter,
+    IntegerParameter,
+    FloatParameter,
+    DateTimeParameter,
+)
 
 import logging
 from omotes_rest.postgres_interface import PostgresInterface
-from omotes_rest.config import POSTGRESConfig
+from omotes_rest.config import PostgresConfig
 from omotes_rest.apis.api_dataclasses import JobInput, JobStatusResponse
 from omotes_rest.db_models.job_rest import JobRestStatus, JobRest
-from omotes_rest.workflows import FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME
+from omotes_rest.settings import EnvSettings
 
 logger = logging.getLogger("omotes_rest")
 
@@ -29,17 +35,13 @@ class RestInterface:
     """Interface to Omotes."""
     postgres_if: PostgresInterface
     """Interface to Omotes rest postgres."""
-    workflow_type_manager: WorkflowTypeManager
-    """Interface to Omotes."""
 
-    def __init__(self, workflow_type_manager: WorkflowTypeManager):
-        """Create the omotes rest interface.
-
-        :param workflow_type_manager: All available OMOTES workflow types.
-        """
-        self.omotes_if = OmotesInterface(EnvRabbitMQConfig(), workflow_type_manager)
-        self.postgres_if = PostgresInterface(POSTGRESConfig())
-        self.workflow_type_manager = workflow_type_manager
+    def __init__(
+        self,
+    ) -> None:
+        """Create the omotes rest interface."""
+        self.omotes_if = OmotesInterface(EnvRabbitMQConfig(), EnvSettings.omotes_id())
+        self.postgres_if = PostgresInterface(PostgresConfig())
 
     def start(self) -> None:
         """Start the omotes rest interface."""
@@ -108,23 +110,99 @@ class RestInterface:
             progress_message=progress_update.message,
         )
 
+    def get_workflows_jsonforms_format(self) -> list:
+        """Get the available workflows with jsonforms schema for the non-ESDL parameters.
+
+        :return: dictionary response.
+        """
+        workflows = []
+        for _workflow in self.omotes_if.get_workflow_type_manager().get_all_workflows():
+            properties = dict()
+            required_props = []
+            if _workflow.workflow_parameters:
+                for _parameter in _workflow.workflow_parameters:
+                    jsonforms_schema: dict[
+                        str, Union[str, float, datetime, list[dict[str, str]]]
+                    ] = dict()
+                    if _parameter.title:
+                        jsonforms_schema["title"] = _parameter.title
+                    if _parameter.description:
+                        jsonforms_schema["description"] = _parameter.description
+
+                    if isinstance(_parameter, StringParameter):
+                        jsonforms_schema["type"] = "string"
+                        if _parameter.default:
+                            jsonforms_schema["default"] = _parameter.default
+                        if _parameter.enum_options:
+                            one_of_list = []
+                            for enum_option in _parameter.enum_options:
+                                one_of_list.append(
+                                    dict(const=enum_option.key_name, title=enum_option.display_name)
+                                )
+                            jsonforms_schema["oneOf"] = one_of_list
+                    elif isinstance(_parameter, BooleanParameter):
+                        jsonforms_schema["type"] = "boolean"
+                        if _parameter.default:
+                            jsonforms_schema["default"] = _parameter.default
+                    elif isinstance(_parameter, IntegerParameter):
+                        jsonforms_schema["type"] = "integer"
+                        if _parameter.default:
+                            jsonforms_schema["default"] = _parameter.default
+                        if _parameter.minimum:
+                            jsonforms_schema["minimum"] = _parameter.minimum
+                        if _parameter.maximum:
+                            jsonforms_schema["maximum"] = _parameter.maximum
+                    elif isinstance(_parameter, FloatParameter):
+                        jsonforms_schema["type"] = "number"
+                        if _parameter.default:
+                            jsonforms_schema["default"] = _parameter.default
+                        if _parameter.minimum:
+                            jsonforms_schema["minimum"] = _parameter.minimum
+                        if _parameter.maximum:
+                            jsonforms_schema["maximum"] = _parameter.maximum
+                    elif isinstance(_parameter, DateTimeParameter):
+                        jsonforms_schema["type"] = "string"
+                        jsonforms_schema["format"] = "date-time"
+                        if _parameter.default:
+                            jsonforms_schema["default"] = _parameter.default.isoformat()
+                    else:
+                        raise NotImplementedError(
+                            f"Parameter type {type(_parameter)} not supported"
+                        )
+                    properties[_parameter.key_name] = jsonforms_schema
+                    required_props.append(_parameter.key_name)
+
+            if properties:
+                workflows.append(
+                    dict(
+                        id=_workflow.workflow_type_name,
+                        description=_workflow.workflow_type_description_name,
+                        schema=dict(type="object", properties=properties, required=required_props),
+                    )
+                )
+            else:
+                workflows.append(
+                    dict(
+                        id=_workflow.workflow_type_name,
+                        description=_workflow.workflow_type_description_name,
+                    )
+                )
+        return workflows
+
     def submit_job(self, job_input: JobInput) -> JobStatusResponse:
         """When a job has a progress update.
 
         :param job_input: JobInput dataclass with job input.
         :return: JobStatusResponse.
         """
-        workflow_type = self.workflow_type_manager.get_workflow_by_name(
-            FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_input.workflow_type]
+        workflow_type = self.omotes_if.get_workflow_type_manager().get_workflow_by_name(
+            job_input.workflow_type
         )
         if not workflow_type:
             raise RuntimeError(f"Unknown workflow type {job_input.workflow_type}")
 
-        esdlstr_bytes = job_input.input_esdl.encode("utf-8")
-        esdlstr_base64_bytes = base64.b64decode(esdlstr_bytes)
-        esdl_str = esdlstr_base64_bytes.decode("utf-8")
         job = self.omotes_if.submit_job(
-            esdl=esdl_str,
+            esdl=job_input.input_esdl,
             params_dict=job_input.input_params_dict,
             workflow_type=workflow_type,
             job_timeout=timedelta(seconds=job_input.timeout_after_s),
@@ -136,7 +214,7 @@ class RestInterface:
         self.postgres_if.put_new_job(
             job_id=job.id,
             job_input=job_input,
-            esdl_input=esdl_str,
+            esdl_input=job_input.input_esdl,
         )
         return JobStatusResponse(job_id=job.id, status=JobRestStatus.REGISTERED)
 
@@ -164,8 +242,8 @@ class RestInterface:
         job_in_db = self.get_job(job_id)
 
         if job_in_db:
-            workflow_type = self.workflow_type_manager.get_workflow_by_name(
-                FRONTEND_NAME_TO_OMOTES_WORKFLOW_NAME[job_in_db.workflow_type]
+            workflow_type = self.omotes_if.get_workflow_type_manager().get_workflow_by_name(
+                job_in_db.workflow_type
             )
             if not workflow_type:
                 raise RuntimeError(f"Unknown workflow type {job_in_db.workflow_type}")
