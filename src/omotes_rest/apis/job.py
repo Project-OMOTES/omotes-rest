@@ -1,3 +1,4 @@
+import base64
 import logging
 import uuid
 
@@ -38,6 +39,10 @@ class JobAPI(MethodView):
     @api.response(200, JobStatusResponse.Schema())
     def post(self, job_input: JobInput) -> JobStatusResponse:
         """Start new job: 'input_params_dict' can have lists and (nested) dicts as values."""
+        esdlstr_bytes = job_input.input_esdl.encode("utf-8")
+        esdlstr_base64_bytes = base64.b64decode(esdlstr_bytes)
+        esdl_str = esdlstr_base64_bytes.decode("utf-8")
+        job_input.input_esdl = esdl_str
         return current_app.rest_if.submit_job(job_input)
 
     @api.response(200, JobSummary.Schema(many=True))
@@ -53,7 +58,15 @@ class JobFromIdAPI(MethodView):
     @api.response(200, JobResponse.Schema())
     def get(self, job_id: str) -> JobRest | None:
         """Return job details."""
-        return current_app.rest_if.get_job(uuid.UUID(job_id))
+        job =  current_app.rest_if.get_job(uuid.UUID(job_id))
+        input_esdl = job.input_esdl
+        if input_esdl:
+            job.input_esdl = base64.b64encode(bytes(input_esdl, "utf-8")).decode("utf-8")
+
+        output_esdl = job.output_esdl
+        if output_esdl:
+            job.output_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
+        return job
 
     @api.response(200, JobDeleteResponse.Schema())
     def delete(self, job_id: str) -> JobDeleteResponse:
@@ -102,6 +115,8 @@ class JobResultAPI(MethodView):
         """Return job result with output ESDL (can be None)."""
         job_uuid = uuid.UUID(job_id)
         output_esdl = current_app.rest_if.get_job_output_esdl(job_uuid)
+        if output_esdl:
+            output_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
         return JobResultResponse(job_id=job_uuid, output_esdl=output_esdl)
 
 

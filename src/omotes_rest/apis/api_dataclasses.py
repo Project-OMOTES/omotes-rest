@@ -47,7 +47,7 @@ class JobInput:
     Schema: ClassVar[Type[Schema]] = Schema
 
     job_name: str = "job name"
-    workflow_type: str = "Draft Design - Quickscan Validation"
+    workflow_type: str = "grow_optimizer_no_heat_losses"
     user_name: str = "user name"
     input_esdl: str = "input ESDL base64string"
     project_name: str = "project name"
