@@ -1,11 +1,5 @@
 version: "3.8"
 
-networks:
-  omotes:
-
-volumes:
-  db-data:
-
 services:
   omotes-rest:
       image: omotes-rest-dev
