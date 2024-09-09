@@ -59,13 +59,14 @@ class JobFromIdAPI(MethodView):
     def get(self, job_id: str) -> JobRest | None:
         """Return job details."""
         job = current_app.rest_if.get_job(uuid.UUID(job_id))
-        input_esdl = job.input_esdl
-        if input_esdl:
-            job.input_esdl = base64.b64encode(bytes(input_esdl, "utf-8")).decode("utf-8")
+        if job:
+            input_esdl = job.input_esdl
+            if input_esdl:
+                job.input_esdl = base64.b64encode(bytes(input_esdl, "utf-8")).decode("utf-8")
 
-        output_esdl = job.output_esdl
-        if output_esdl:
-            job.output_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
+            output_esdl = job.output_esdl
+            if output_esdl:
+                job.output_esdl = base64.b64encode(bytes(output_esdl, "utf-8")).decode("utf-8")
         return job
 
     @api.response(200, JobDeleteResponse.Schema())
