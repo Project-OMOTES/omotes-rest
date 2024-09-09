@@ -58,7 +58,7 @@ class JobFromIdAPI(MethodView):
     @api.response(200, JobResponse.Schema())
     def get(self, job_id: str) -> JobRest | None:
         """Return job details."""
-        job =  current_app.rest_if.get_job(uuid.UUID(job_id))
+        job = current_app.rest_if.get_job(uuid.UUID(job_id))
         input_esdl = job.input_esdl
         if input_esdl:
             job.input_esdl = base64.b64encode(bytes(input_esdl, "utf-8")).decode("utf-8")
