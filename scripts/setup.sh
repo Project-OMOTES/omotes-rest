@@ -6,7 +6,7 @@
 #$DOCKER_COMPOSE stop
 
 # Deploy postgres omotes_rest schema
-$DOCKER_COMPOSE -f ./docker-compose.yml --profile=manual_dev down rest_postgres_db_dev
+$DOCKER_COMPOSE -f ./docker-compose.yml down rest_postgres_db
 $DOCKER_COMPOSE -f ./docker-compose.yml up -d --wait rest_postgres_db
 $DOCKER_COMPOSE -f ./docker-compose.yml exec rest_postgres_db psql -d postgres -c 'CREATE DATABASE omotes_rest;'
 $DOCKER_COMPOSE -f ./docker-compose.yml exec rest_postgres_db psql -d omotes_rest -c "CREATE USER ${POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD}';"
