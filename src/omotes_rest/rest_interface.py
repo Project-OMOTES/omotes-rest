@@ -16,6 +16,7 @@ from omotes_sdk.workflow_type import (
     IntegerParameter,
     FloatParameter,
     DateTimeParameter,
+    DurationParameter,
 )
 
 import logging
@@ -165,6 +166,14 @@ class RestInterface:
                         jsonforms_schema["format"] = "date-time"
                         if _parameter.default:
                             jsonforms_schema["default"] = _parameter.default.isoformat()
+                    elif isinstance(_parameter, DurationParameter):
+                        jsonforms_schema["type"] = "number"
+                        if _parameter.default:
+                            jsonforms_schema["default"] = _parameter.default.total_seconds()
+                        if _parameter.minimum:
+                            jsonforms_schema["minimum"] = _parameter.minimum.total_seconds()
+                        if _parameter.maximum:
+                            jsonforms_schema["maximum"] = _parameter.maximum.total_seconds()
                     else:
                         raise NotImplementedError(
                             f"Parameter type {type(_parameter)} not supported"
