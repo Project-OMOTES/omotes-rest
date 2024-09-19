@@ -214,12 +214,13 @@ class RestInterface:
                         )
                     properties[_parameter.key_name] = jsonforms_schema
                     required_props.append(_parameter.key_name)
-                    uischema["elements"].append(
-                        {
-                            "type": "Control",
-                            "scope": f"#/properties/{_parameter.key_name}",
-                        }
-                    )
+                    if isinstance(uischema["elements"], list):
+                        uischema["elements"].append(
+                            {
+                                "type": "Control",
+                                "scope": f"#/properties/{_parameter.key_name}",
+                            }
+                        )
 
             if properties:
                 workflows.append(
