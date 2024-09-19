@@ -153,6 +153,7 @@ class RestInterface:
         for _workflow in self.omotes_if.get_workflow_type_manager().get_all_workflows():
             properties = dict()
             required_props = []
+            uischema = dict(type="VerticalLayout", elements=[])
             if _workflow.workflow_parameters:
                 for _parameter in _workflow.workflow_parameters:
                     jsonforms_schema: dict[
@@ -213,6 +214,12 @@ class RestInterface:
                         )
                     properties[_parameter.key_name] = jsonforms_schema
                     required_props.append(_parameter.key_name)
+                    uischema["elements"].append(
+                        {
+                            "type": "Control",
+                            "scope": f"#/properties/{_parameter.key_name}",
+                        }
+                    )
 
             if properties:
                 workflows.append(
@@ -220,6 +227,7 @@ class RestInterface:
                         id=_workflow.workflow_type_name,
                         description=_workflow.workflow_type_description_name,
                         schema=dict(type="object", properties=properties, required=required_props),
+                        uischema=uischema,
                     )
                 )
             else:
