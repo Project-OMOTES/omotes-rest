@@ -1,7 +1,8 @@
 import uuid
 from datetime import timedelta, datetime
-from typing import Union
+from typing import Union, Any
 
+from omotes_sdk.types import ParamsDict
 from omotes_sdk.omotes_interface import OmotesInterface
 from omotes_sdk.internal.common.config import EnvRabbitMQConfig
 from omotes_sdk.omotes_interface import (
@@ -10,6 +11,7 @@ from omotes_sdk.omotes_interface import (
     JobProgressUpdate,
     JobStatusUpdate,
 )
+import omotes_sdk.workflow_type
 from omotes_sdk.workflow_type import (
     StringParameter,
     BooleanParameter,
@@ -17,6 +19,7 @@ from omotes_sdk.workflow_type import (
     FloatParameter,
     DateTimeParameter,
     DurationParameter,
+    WorkflowType,
 )
 
 import logging
@@ -27,6 +30,34 @@ from omotes_rest.db_models.job_rest import JobRestStatus, JobRest
 from omotes_rest.settings import EnvSettings
 
 logger = logging.getLogger("omotes_rest")
+
+
+def convert_json_forms_values_to_params_dict(
+    workflow_type: WorkflowType, input_params_dict: dict[str, Any]
+) -> ParamsDict:
+    """Convert values received from the JSON forms format to the omotes params_dict format.
+
+    :param workflow_type: The workflow type for which these JSON format values were received.
+    :param input_params_dict: Dictionary of values in JSON forms format.
+    :return: The omotes params_dict.
+    """
+    params_dict: ParamsDict = {}
+    if workflow_type.workflow_parameters:
+        for parameter in workflow_type.workflow_parameters:
+            json_forms_value = input_params_dict.get(parameter.key_name)
+
+            if json_forms_value is None:
+                raise RuntimeError(f"Missing parameter {parameter.key_name} in job submission.")
+
+            match type(parameter):
+                case omotes_sdk.workflow_type.DurationParameter:
+                    params_dict[parameter.key_name] = timedelta(seconds=json_forms_value)
+                case omotes_sdk.workflow_type.DateTimeParameter:
+                    params_dict[parameter.key_name] = datetime.fromisoformat(json_forms_value)
+                case _:
+                    params_dict[parameter.key_name] = json_forms_value
+
+    return params_dict
 
 
 class RestInterface:
@@ -210,9 +241,13 @@ class RestInterface:
         if not workflow_type:
             raise RuntimeError(f"Unknown workflow type {job_input.workflow_type}")
 
+        params_dict = convert_json_forms_values_to_params_dict(
+            workflow_type, job_input.input_params_dict
+        )
+
         job = self.omotes_if.submit_job(
             esdl=job_input.input_esdl,
-            params_dict=job_input.input_params_dict,
+            params_dict=params_dict,
             workflow_type=workflow_type,
             job_timeout=timedelta(seconds=job_input.timeout_after_s),
             callback_on_finished=self.handle_on_job_finished,
