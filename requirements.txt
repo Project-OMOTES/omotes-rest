@@ -79,7 +79,7 @@ mypy-extensions==1.0.0
     # via typing-inspect
 omotes-sdk-protocol==0.1.1
     # via omotes-sdk-python
-omotes-sdk-python==2.0.2
+omotes-sdk-python==3.0.0
     # via omotes-rest (pyproject.toml)
 packaging==23.1
     # via
