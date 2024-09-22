@@ -17,7 +17,3 @@ $DOCKER_COMPOSE -f ./docker-compose.yml exec rest_postgres_db psql -d omotes_res
 $DOCKER_COMPOSE -f ./docker-compose.yml exec rest_postgres_db psql -d omotes_rest -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${POSTGRES_USERNAME};"
 $DOCKER_COMPOSE -f ./docker-compose.yml exec rest_postgres_db psql -d omotes_rest -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${POSTGRES_USERNAME};"
 $DOCKER_COMPOSE -f ./docker-compose.yml exec rest_postgres_db psql -d omotes_rest -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${POSTGRES_USERNAME};"
-
-# Upgrade omotes_rest tables
-$DOCKER_COMPOSE -f ./docker-compose.yml build rest_postgres_db_upgrade
-$DOCKER_COMPOSE -f ./docker-compose.yml run --rm rest_postgres_db_upgrade

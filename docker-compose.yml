@@ -16,6 +16,8 @@ services:
     ports:
       - "9200:9200"
     environment:
+      OMOTES_ID: ${OMOTES_ID}
+
       RABBITMQ_HOSTNAME: rabbitmq-nwn
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
@@ -23,10 +25,13 @@ services:
       RABBITMQ_VIRTUALHOST: omotes
 
       POSTGRES_HOST: rest_postgres_db
-      POSTGRES_PORT: 5432
+      POSTGRES_PORT: 7432
       POSTGRES_DATABASE: omotes_rest
       POSTGRES_USERNAME: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      POSTGRES_ROOT_USER: ${POSTGRES_ROOT_USER}
+      POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
 
       LOG_LEVEL: info
     depends_on:
