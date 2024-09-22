@@ -43,6 +43,7 @@ services:
     restart: unless-stopped
     volumes:
       - "db-data:/var/lib/POSTGRES/data/"
+      - "./src/postgres-init.sql:/setup/init.sql"
     networks:
       - omotes
     environment:
