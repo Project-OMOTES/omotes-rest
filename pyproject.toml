@@ -37,6 +37,7 @@ dependencies = [
     "structlog ~= 23.1.0",
     "SQLAlchemy == 2.0.28",
     "omotes-sdk-python ~= 3.1.2",
+    "alembic ~= 1.13.1",
 ]
 
 [project.optional-dependencies]

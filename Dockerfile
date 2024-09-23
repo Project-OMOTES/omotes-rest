@@ -15,4 +15,4 @@ COPY src /app
 # To avoid warning from flask dotenv.
 RUN touch .env
 
-CMD gunicorn omotes_rest.main:app --config gunicorn.conf.py
+CMD ["/app/start.sh"]

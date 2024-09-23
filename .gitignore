@@ -5,7 +5,6 @@
 .cache
 .tmp
 *.swp
-.idea/
 .classpath
 build/
 .project
@@ -24,3 +23,15 @@ venv/
 .venv/
 .coverage
 test-results.xml
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
