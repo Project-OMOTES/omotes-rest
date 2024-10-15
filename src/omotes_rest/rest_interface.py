@@ -258,6 +258,7 @@ class RestInterface:
 
         job = self.omotes_if.submit_job(
             esdl=job_input.input_esdl,
+            job_reference=job_input.job_name,
             params_dict=params_dict,
             workflow_type=workflow_type,
             job_timeout=timedelta(seconds=job_input.timeout_after_s),
