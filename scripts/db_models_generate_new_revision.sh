@@ -5,4 +5,5 @@ if [[ "$OSTYPE" != "win32" && "$OSTYPE" != "msys" ]]; then
   . .venv/bin/activate
 fi
 
-pip-sync ./dev-requirements.txt ./requirements.txt
+cd src/
+alembic revision --autogenerate -m "$1"
