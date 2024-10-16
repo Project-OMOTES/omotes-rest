@@ -86,9 +86,9 @@ multidict==6.1.0
     # via yarl
 mypy-extensions==1.0.0
     # via typing-inspect
-omotes-sdk-protocol==0.1.6
+omotes-sdk-protocol==0.1.12
     # via omotes-sdk-python
-omotes-sdk-python==3.2.2
+omotes-sdk-python==3.2.3
     # via omotes-rest (pyproject.toml)
 ordered-set==4.1.0
     # via pyecore
@@ -108,7 +108,7 @@ propcache==0.2.0
     # via yarl
 protobuf==4.25.5
     # via omotes-sdk-protocol
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
     # via omotes-rest (pyproject.toml)
 pyecore==0.12.1
     # via pyesdl
@@ -155,7 +155,7 @@ werkzeug==3.0.4
     # via
     #   flask
     #   flask-smorest
-yarl==1.15.2
+yarl==1.15.3
     # via
     #   aio-pika
     #   aiormq
