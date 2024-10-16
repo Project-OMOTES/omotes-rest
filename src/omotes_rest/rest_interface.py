@@ -2,7 +2,7 @@ import uuid
 from datetime import timedelta, datetime
 from typing import Union, Any
 
-from omotes_sdk.types import ParamsDictValues
+from omotes_sdk.types import ParamsDict
 from omotes_sdk.omotes_interface import OmotesInterface
 from omotes_sdk.internal.common.config import EnvRabbitMQConfig
 from omotes_sdk.omotes_interface import (
@@ -30,8 +30,6 @@ from omotes_rest.db_models.job_rest import JobRestStatus, JobRest
 from omotes_rest.settings import EnvSettings
 
 logger = logging.getLogger("omotes_rest")
-
-ParamsDict = dict[str, ParamsDictValues]
 
 
 def convert_json_forms_values_to_params_dict(
