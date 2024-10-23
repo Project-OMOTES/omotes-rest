@@ -1,8 +1,8 @@
 networks:
   omotes:
     external: true
-    mapeditor-net:
-      external: true
+  mapeditor-net:
+    external: true
 
 volumes:
   db-data:
