@@ -134,6 +134,7 @@ class JobResponse:
     input_esdl: str
     output_esdl: str
     logs: str
+    esdl_feedback: dict[str, list]
 
 
 @add_schema

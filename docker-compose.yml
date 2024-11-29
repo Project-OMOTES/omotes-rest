@@ -9,7 +9,7 @@ volumes:
 
 services:
   omotes-rest:
-    image: ghcr.io/project-omotes/omotes_rest:1.0.2
+    image: ghcr.io/project-omotes/omotes_rest:1.1.0
     networks:
       - omotes
       - mapeditor-net

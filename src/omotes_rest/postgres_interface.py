@@ -213,6 +213,7 @@ class PostgresInterface:
         new_status: JobRestStatus,
         logs: str | None = None,
         output_esdl: str | None = None,
+        esdl_feedback: dict[str, list] | None = None,
     ) -> None:
         """Set the job to stopped with supplied status.
 
@@ -220,6 +221,7 @@ class PostgresInterface:
         :param new_status: JobRestStatus.
         :param logs: optional string containing the job logs.
         :param output_esdl: optional string containing the job output esdl.
+        :param esdl_feedback: optional esdl feedback messages per esdl object id.
         """
         logger.debug("For job '%s' received new status '%s'", job_id, new_status)
 
@@ -228,7 +230,11 @@ class PostgresInterface:
                 update(JobRest)
                 .where(JobRest.job_id == job_id)
                 .values(
-                    status=new_status, stopped_at=datetime.now(), logs=logs, output_esdl=output_esdl
+                    status=new_status,
+                    stopped_at=datetime.now(),
+                    logs=logs,
+                    output_esdl=output_esdl,
+                    esdl_feedback=esdl_feedback,
                 )
             )
             session.execute(stmnt)

@@ -52,3 +52,5 @@ class JobRest(Base):
     """Output ESDL as base64 encoded string."""
     logs: str = db.Column(db.String)
     """Logs as string."""
+    esdl_feedback: str = db.Column(db.JSON)
+    """Dictionary of ESDL feedback messages per object id."""
