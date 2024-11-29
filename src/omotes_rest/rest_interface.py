@@ -1,6 +1,7 @@
 import uuid
 from datetime import timedelta, datetime
 from typing import Union, Any
+import logging
 
 from omotes_sdk.types import ParamsDict
 from omotes_sdk.omotes_interface import OmotesInterface
@@ -21,8 +22,7 @@ from omotes_sdk.workflow_type import (
     DurationParameter,
     WorkflowType,
 )
-
-import logging
+from omotes_sdk_protocol.job_pb2 import EsdlMessage
 from omotes_rest.postgres_interface import PostgresInterface
 from omotes_rest.config import PostgresConfig
 from omotes_rest.apis.api_dataclasses import JobInput, JobStatusResponse
@@ -101,8 +101,29 @@ class RestInterface:
         else:
             raise NotImplementedError(f"Unknown result type '{result.result_type}'")
 
+        esdl_feedback: dict[str, list] = {}
+        for message in result.esdl_messages:
+            if message.HasField("esdl_object_id") and message.esdl_object_id:
+                esdl_object_id = message.esdl_object_id
+            else:
+                esdl_object_id = "general"
+
+            if esdl_object_id not in esdl_feedback:
+                esdl_feedback[esdl_object_id] = []
+
+            esdl_feedback[esdl_object_id].append(
+                {
+                    "message": message.technical_message,
+                    "severity": EsdlMessage.Severity.Name(message.severity),
+                }
+            )
+
         self.postgres_if.set_job_stopped(
-            job_id=job.id, new_status=final_status, logs=result.logs, output_esdl=result.output_esdl
+            job_id=job.id,
+            new_status=final_status,
+            logs=result.logs,
+            output_esdl=result.output_esdl,
+            esdl_feedback=esdl_feedback,
         )
 
     def handle_on_job_status_update(self, job: Job, status_update: JobStatusUpdate) -> None:
