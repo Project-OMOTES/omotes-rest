@@ -51,7 +51,6 @@ dev = [
     "flake8-docstrings ~= 1.7.0",
     "flake8-quotes ~= 3.4.0",
     "flake8-bugbear ~= 24.10.31",
-    "flake8-mock ~= 0.4",
     "flake8-tuple ~= 0.4.1",
     "pytest ~= 8.3.4",
     "pytest-cov ~= 6.0.0",
@@ -64,8 +63,10 @@ dev = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/pypa/sampleproject"
-"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+homepage = "https://www.nwn.nu"
+documentation = "https://readthedocs.org"
+repository = "https://github.com/Nieuwe-Warmte-Nu/omotes-rest"
+changelog = "https://github.com/Nieuwe-Warmte-Nu/omotes-rest    /blob/main/CHANGELOG.md"
 
 [build-system]
 build-backend = "setuptools.build_meta"

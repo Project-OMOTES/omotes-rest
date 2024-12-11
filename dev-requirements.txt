@@ -81,8 +81,6 @@ flake8-bugbear==24.10.31
     # via omotes-rest (pyproject.toml)
 flake8-docstrings==1.7.0
     # via omotes-rest (pyproject.toml)
-flake8-mock==0.4
-    # via omotes-rest (pyproject.toml)
 flake8-pyproject==1.2.3
     # via omotes-rest (pyproject.toml)
 flake8-quotes==3.4.0
