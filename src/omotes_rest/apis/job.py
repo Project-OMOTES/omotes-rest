@@ -15,7 +15,6 @@ from omotes_rest.apis.api_dataclasses import (
     JobLogsResponse,
     JobSummary,
     JobDeleteResponse,
-    JobCancelResponse,
 )
 from omotes_rest.db_models.job_rest import JobRest
 from omotes_rest.typed_app import current_app
@@ -71,22 +70,9 @@ class JobFromIdAPI(MethodView):
 
     @api.response(200, JobDeleteResponse.Schema())
     def delete(self, job_id: str) -> JobDeleteResponse:
-        """Delete job, and cancel if queued or running."""
+        """Delete job: terminate if running, and delete time series data if present."""
         job_uuid = uuid.UUID(job_id)
         return JobDeleteResponse(job_id=job_uuid, deleted=current_app.rest_if.delete_job(job_uuid))
-
-
-@api.route("/<string:job_id>/cancel")
-class JobCancelAPI(MethodView):
-    """Requests."""
-
-    @api.response(200, JobCancelResponse.Schema())
-    def get(self, job_id: str) -> JobCancelResponse:
-        """Cancel job if queued or running."""
-        job_uuid = uuid.UUID(job_id)
-        return JobCancelResponse(
-            job_id=job_uuid, cancelled=current_app.rest_if.cancel_job(job_uuid)
-        )
 
 
 @api.route("/<string:job_id>/status")

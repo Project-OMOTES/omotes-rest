@@ -308,11 +308,11 @@ class RestInterface:
         """
         return self.postgres_if.get_jobs()
 
-    def cancel_job(self, job_id: uuid.UUID) -> bool:
-        """Cancel job by id.
+    def delete_job(self, job_id: uuid.UUID) -> bool:
+        """Delete job by id.
 
         :param job_id: Job id.
-        :return: True if job found and cancelled.
+        :return: True if job found and deleted.
         """
         job_in_db = self.get_job(job_id)
 
@@ -321,22 +321,12 @@ class RestInterface:
                 job_in_db.workflow_type
             )
             if not workflow_type:
-                raise RuntimeError(f"Unknown workflow type {job_in_db.workflow_type}")
+                self.error = RuntimeError(f"Unknown workflow type {job_in_db.workflow_type}")
+                raise self.error
 
             job = Job(id=job_id, workflow_type=workflow_type)
-            self.omotes_if.cancel_job(job)
-            result = True
-        else:
-            result = False
-        return result
+            self.omotes_if.delete_job(job)
 
-    def delete_job(self, job_id: uuid.UUID) -> bool:
-        """Delete job by id.
-
-        :param job_id: Job id.
-        :return: True if job found and deleted.
-        """
-        self.cancel_job(job_id)
         return self.postgres_if.delete_job(job_id)
 
     def get_job_status(self, job_id: uuid.UUID) -> JobRestStatus | None:
