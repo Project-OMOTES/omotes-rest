@@ -1,18 +1,18 @@
 networks:
   omotes:
     external: true
-  mapeditor-net:
-    external: true
+#  mapeditor-net:
+#    external: true
 
 volumes:
   db-data:
 
 services:
   omotes-rest:
-    image: ghcr.io/project-omotes/omotes_rest:1.1.0
+    image: ghcr.io/project-omotes/omotes_rest:1.2.0
     networks:
       - omotes
-      - mapeditor-net
+#      - mapeditor-net
     ports:
       - "9200:9200"
     environment:
