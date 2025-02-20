@@ -90,17 +90,6 @@ class JobDeleteResponse:
 
 @add_schema
 @dataclass
-class JobCancelResponse:
-    """Response for job cancellation."""
-
-    Schema: ClassVar[Type[Schema]] = Schema
-
-    job_id: uuid.UUID
-    cancelled: bool
-
-
-@add_schema
-@dataclass
 class JobLogsResponse:
     """Response with job logs."""
 
