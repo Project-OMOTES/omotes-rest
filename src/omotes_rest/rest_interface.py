@@ -22,7 +22,7 @@ from omotes_sdk.workflow_type import (
     DurationParameter,
     WorkflowType,
 )
-from omotes_sdk_protocol.job_pb2 import EsdlMessage
+from omotes_sdk_protocol.job_pb2 import EsdlMessage, JobSubmission
 from omotes_rest.postgres_interface import PostgresInterface
 from omotes_rest.config import PostgresConfig
 from omotes_rest.apis.api_dataclasses import JobInput, JobStatusResponse
@@ -275,6 +275,11 @@ class RestInterface:
             workflow_type, job_input.input_params_dict
         )
 
+        if job_input.job_priority:
+            job_priority_pb = JobSubmission.JobPriority.Value(job_input.job_priority.upper())
+        else:
+            job_priority_pb = JobSubmission.JobPriority.MEDIUM
+
         job = self.omotes_if.submit_job(
             esdl=job_input.input_esdl,
             job_reference=job_input.job_name,
@@ -285,11 +290,12 @@ class RestInterface:
             callback_on_progress_update=self.handle_on_job_progress_update,
             callback_on_status_update=self.handle_on_job_status_update,
             auto_disconnect_on_result=True,
+            job_priority=job_priority_pb,
         )
         self.postgres_if.put_new_job(
             job_id=job.id,
             job_input=job_input,
-            esdl_input=job_input.input_esdl,
+            job_priority=JobSubmission.JobPriority.Name(job_priority_pb),
         )
         return JobStatusResponse(job_id=job.id, status=JobRestStatus.REGISTERED)
 

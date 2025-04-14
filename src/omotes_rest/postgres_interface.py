@@ -134,7 +134,7 @@ class PostgresInterface:
         self,
         job_id: uuid.UUID,
         job_input: JobInput,
-        esdl_input: str,
+        job_priority: str,
     ) -> None:
         """Insert a new job into the database.
 
@@ -149,6 +149,7 @@ class PostgresInterface:
                 job_id=job_id,
                 job_name=job_input.job_name,
                 workflow_type=job_input.workflow_type,
+                job_priority=job_priority,
                 status=JobRestStatus.REGISTERED,
                 progress_fraction=0,
                 progress_message="Job registered.",
@@ -157,7 +158,7 @@ class PostgresInterface:
                 user_name=job_input.user_name,
                 project_name=job_input.project_name,
                 input_params_dict=job_input.input_params_dict,
-                input_esdl=esdl_input,
+                input_esdl=job_input.input_esdl,
             )
             session.add(new_job)
         logger.debug("Job %s is submitted as new job in database", job_id)
