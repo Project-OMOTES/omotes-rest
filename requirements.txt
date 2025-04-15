@@ -88,7 +88,7 @@ mypy-extensions==1.0.0
     # via typing-inspect
 omotes-sdk-protocol==1.2.0
     # via omotes-sdk-python
-omotes-sdk-python==4.1.0
+omotes-sdk-python==4.2.0
     # via omotes-rest (pyproject.toml)
 ordered-set==4.1.0
     # via pyecore
@@ -102,7 +102,7 @@ pamqp==3.3.0
     # via
     #   aiormq
     #   omotes-sdk-python
-prompt-toolkit==3.0.50
+prompt-toolkit==3.0.51
     # via click-repl
 propcache==0.3.1
     # via yarl

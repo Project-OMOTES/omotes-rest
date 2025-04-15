@@ -190,7 +190,7 @@ omotes-sdk-protocol==1.2.0
     # via
     #   -c requirements.txt
     #   omotes-sdk-python
-omotes-sdk-python==4.1.0
+omotes-sdk-python==4.2.0
     # via
     #   -c requirements.txt
     #   omotes-rest (pyproject.toml)
@@ -220,7 +220,7 @@ platformdirs==4.3.7
     # via black
 pluggy==1.5.0
     # via pytest
-prompt-toolkit==3.0.50
+prompt-toolkit==3.0.51
     # via
     #   -c requirements.txt
     #   click-repl

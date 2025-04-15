@@ -130,26 +130,20 @@ class PostgresInterface:
         if self.engine:
             self.engine.dispose()
 
-    def put_new_job(
-        self,
-        job_id: uuid.UUID,
-        job_input: JobInput,
-        job_priority: str,
-    ) -> None:
+    def put_new_job(self, job_id: uuid.UUID, job_input: JobInput) -> None:
         """Insert a new job into the database.
 
         Note: Assumption is that the job_id is unique and has not yet been added to the database.
 
         :param job_id: Unique identifier of the job.
         :param job_input: Received input for the job.
-        :param job_input: Received input ESDL for the job.
         """
         with session_scope(do_expunge=False) as session:
             new_job = JobRest(
                 job_id=job_id,
                 job_name=job_input.job_name,
                 workflow_type=job_input.workflow_type,
-                job_priority=job_priority,
+                job_priority=job_input.job_priority,
                 status=JobRestStatus.REGISTERED,
                 progress_fraction=0,
                 progress_message="Job registered.",

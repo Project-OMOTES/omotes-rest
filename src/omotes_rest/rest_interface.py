@@ -275,10 +275,10 @@ class RestInterface:
             workflow_type, job_input.input_params_dict
         )
 
-        if job_input.job_priority:
-            job_priority_pb = JobSubmission.JobPriority.Value(job_input.job_priority.upper())
-        else:
-            job_priority_pb = JobSubmission.JobPriority.MEDIUM
+        if not job_input.job_priority:
+            job_input.job_priority = JobSubmission.JobPriority.Name(
+                JobSubmission.JobPriority.MEDIUM
+            ).lower()
 
         job = self.omotes_if.submit_job(
             esdl=job_input.input_esdl,
@@ -290,13 +290,9 @@ class RestInterface:
             callback_on_progress_update=self.handle_on_job_progress_update,
             callback_on_status_update=self.handle_on_job_status_update,
             auto_disconnect_on_result=True,
-            job_priority=job_priority_pb,
+            job_priority=JobSubmission.JobPriority.Value(job_input.job_priority.upper()),
         )
-        self.postgres_if.put_new_job(
-            job_id=job.id,
-            job_input=job_input,
-            job_priority=JobSubmission.JobPriority.Name(job_priority_pb),
-        )
+        self.postgres_if.put_new_job(job_id=job.id, job_input=job_input)
         return JobStatusResponse(job_id=job.id, status=JobRestStatus.REGISTERED)
 
     def get_job(self, job_id: uuid.UUID) -> JobRest | None:
