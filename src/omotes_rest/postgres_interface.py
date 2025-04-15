@@ -138,6 +138,8 @@ class PostgresInterface:
         :param job_id: Unique identifier of the job.
         :param job_input: Received input for the job.
         """
+        if not job_input.job_priority:
+            raise RuntimeError(f"Error: job priority is 'None' for job '{job_input.job_name}'.")
         with session_scope(do_expunge=False) as session:
             new_job = JobRest(
                 job_id=job_id,
