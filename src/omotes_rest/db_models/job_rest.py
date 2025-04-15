@@ -26,6 +26,8 @@ class JobRest(Base):
     """Job name/description."""
     workflow_type: str = db.Column(db.String)
     """Name of the workflow this job runs."""
+    job_priority: str = db.Column(db.String)
+    """Priority of this run."""
     status: JobRestStatus = db.Column(db.Enum(JobRestStatus), nullable=False)
     """Last received status of the job."""
     progress_message: str = db.Column(db.String, nullable=False)

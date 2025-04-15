@@ -2,9 +2,10 @@ import uuid
 from dataclasses import field
 from datetime import datetime
 from enum import Enum
-from typing import Any, ClassVar, Type
+from typing import Any, ClassVar, Type, Optional
 
-from marshmallow import Schema
+from marshmallow import Schema, validate
+from marshmallow.fields import String
 from marshmallow_dataclass import add_schema, dataclass
 
 
@@ -53,6 +54,15 @@ class JobInput:
     project_name: str = "project name"
     input_params_dict: dict[str, Any] = field(default_factory=dict)
     timeout_after_s: int = 3600
+    job_priority: Optional[str] = field(
+        default=None,
+        metadata={
+            "marshmallow_field": String(
+                allow_none=True,
+                validate=validate.OneOf(["medium", "low", "high"])
+            )
+        }
+    )
 
 
 @add_schema
@@ -124,6 +134,7 @@ class JobResponse:
     output_esdl: str
     logs: str
     esdl_feedback: dict[str, list]
+    job_priority: str
 
 
 @add_schema
