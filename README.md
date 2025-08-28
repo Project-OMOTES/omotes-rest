@@ -105,3 +105,7 @@ First, change directory: `cd src/`
 - Perform all revisions: `alembic upgrade head`
 - Downgrade to a revision: `alembic downgrade <revision>` (revision 'base' to
   undo everything.)
+
+## Monitoring job runs
+
+A SQL script can be applied optionally to monitor omotes job runs. More details see [Monitoring_job_runs](/doc/Monitoring_job_runs.md)
