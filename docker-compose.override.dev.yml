@@ -4,7 +4,3 @@ services:
       build:
         context: ..
         dockerfile: omotes-rest/dev.Dockerfile
-
-  rest_postgres_db:
-    ports:
-      - "${POSTGRES_PORT}:5432"
