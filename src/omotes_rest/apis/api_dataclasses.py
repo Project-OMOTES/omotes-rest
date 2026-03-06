@@ -59,9 +59,9 @@ class JobInput:
         metadata={
             "marshmallow_field": String(
                 allow_none=True,
-                validate=validate.OneOf(["medium", "low", "high"])
+                validate=validate.OneOf(["medium", "low", "high"]),
             )
-        }
+        },
     )
 
 
@@ -133,7 +133,7 @@ class JobResponse:
     input_esdl: str
     output_esdl: str
     logs: str
-    esdl_feedback: dict[str, list]
+    esdl_feedback: list[dict]
     job_priority: str
 
 
