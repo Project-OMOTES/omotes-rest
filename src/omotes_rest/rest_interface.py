@@ -101,22 +101,26 @@ class RestInterface:
         else:
             raise NotImplementedError(f"Unknown result type '{result.result_type}'")
 
-        esdl_feedback: dict[str, list] = {}
+        esdl_feedback: list[dict] = []
         for message in result.esdl_messages:
             if message.HasField("esdl_object_id") and message.esdl_object_id:
                 esdl_object_id = message.esdl_object_id
             else:
                 esdl_object_id = "general"
 
-            if esdl_object_id not in esdl_feedback:
-                esdl_feedback[esdl_object_id] = []
-
-            esdl_feedback[esdl_object_id].append(
-                {
-                    "message": message.technical_message,
-                    "severity": EsdlMessage.Severity.Name(message.severity),
-                }
+            id_feedback = next(
+                (feedback for feedback in esdl_feedback if feedback["assetID"] == esdl_object_id),
+                None,
             )
+            feedback_message = {
+                "validation_message": message.technical_message,
+                "severity": EsdlMessage.Severity.Name(message.severity),
+            }
+
+            if id_feedback:
+                id_feedback["messages"].append(feedback_message)
+            else:
+                esdl_feedback.append({"assetID": esdl_object_id, "messages": [feedback_message]})
 
         self.postgres_if.set_job_stopped(
             job_id=job.id,

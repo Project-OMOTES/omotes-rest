@@ -210,7 +210,7 @@ class PostgresInterface:
         new_status: JobRestStatus,
         logs: str | None = None,
         output_esdl: str | None = None,
-        esdl_feedback: dict[str, list] | None = None,
+        esdl_feedback: list[dict] | None = None,
     ) -> None:
         """Set the job to stopped with supplied status.
 
