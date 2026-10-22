@@ -5,8 +5,10 @@ WORKDIR /app
 ENV ENV=prod
 ENV FLASK_APP=omotes_rest/main.py
 
-RUN apt-get -y update
-RUN pip install --upgrade pip
+RUN apt-get -y update && \
+	apt-get install -y --only-upgrade ca-certificates && \
+	apt-get clean
+RUN pip install --upgrade 'pip>=26.2.2'
 
 COPY requirements.txt /app/omotes_rest/requirements.txt
 RUN pip install --no-cache-dir -r /app/omotes_rest/requirements.txt
